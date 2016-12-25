@@ -29,7 +29,7 @@ def delete_node(handle_id, class_var):
         writer.execute(query, handle_id=handle_id)
 
 
-def get_uniqueryue_node(class_var, key, value):
+def get_unique_node(class_var, key, value):
     query = """
         MATCH (n:%s {%s: {value}})
         RETURN n LIMIT 1
