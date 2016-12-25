@@ -1,0 +1,92 @@
+{% extends 'base.html' %}
+{% block title %}{{ block.super }} | OPP | {{ object }}{% endblock %}
+
+{% block content %}
+    <div class="page-header">
+        <h1>{{ object.name }} <small>{{ object.node.no_of_beneficiaries }}</small></h1>
+    </div>
+    <div class="row">
+        <div class="col-md-6">
+            <dl class="dl-horizontal">
+                <dt>Salaries:</dt><dd>{{ object.node.salaries }}</dd>
+                <dt>Average salary:</dt><dd>{{ object.node.average_salary }}</dd>
+                <dt>Forma prawna:</dt><dd>{{ object.legal_form.name }}</dd>
+                <dt>Miasto:</dt> <dd>{{ object.city.name }},{{ object.city.county.name }}, {{ object.city.county.voivodeship.name }}  </dd>
+            </dl>
+        </div>
+    </div>
+    <div class="row">
+      <div class="col-md-4">
+        <div class="panel panel-default">
+          <div class="panel-heading">
+            <h3 class="panel-title">Osoby</h3>
+          </div>
+          <div class="panel-body">
+            <ul class="list-unstyled">
+              {% for board_member in object.board_members|dictsort:"person.name" %}
+              <li>
+                <a href="{{ board_member.person.get_absolute_url }}">{{ board_member.person.name }}</a> as <ul> <li>{{ board_member.role }}</li> </ul>
+              </li>
+              {% empty %}
+              <li>Brak danych</li>
+              {% endfor %}
+            </ul>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="panel panel-default">
+          <div class="panel-heading">
+            <h3 class="panel-title">Cele statutowe</h3>
+          </div>
+          <div class="panel-body">
+            <ul class="list-unstyled">
+              {% for aim in object.aims %}
+              <li>
+                <a href="{{ aim.aim.get_absolute_url }}">{{ aim.aim.name }}</a>
+              </li>
+              {% empty %}
+              <li>Brak danych</li>
+              {% endfor %}
+            </ul>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="panel panel-default">
+          <div class="panel-heading">
+            <h3 class="panel-title">Strefy pożytku publicznego</h3>
+          </div>
+          <div class="panel-body">
+            <ul class="list-unstyled">
+              {% for pba in object.public_benefit_areas %}
+              <li>
+                <a href="{{ pba.area.get_absolute_url }}">{{ pba.area.name }}</a>
+              </li>
+              {% empty %}
+              <li>Brak danych</li>
+              {% endfor %}
+            </ul>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="panel panel-default">
+          <div class="panel-heading">
+            <h3 class="panel-title">Zasięg terytorialny</h3>
+          </div>
+          <div class="panel-body">
+            <ul class="list-unstyled">
+              {% for tr in object.territorial_reach %}
+              <li>
+                <a href="{{ tr.reach.get_absolute_url }}">{{ tr.reach.name }}</a>
+              </li>
+              {% empty %}
+              <li>Brak danych</li>
+              {% endfor %}
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+    {% endblock %}

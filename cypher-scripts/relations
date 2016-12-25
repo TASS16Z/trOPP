@@ -1,0 +1,35 @@
+CREATE
+  (opp1)<-[:MANAGES]-(p1),
+  (opp1)<-[:MANAGES]-(p2),
+  (opp1)<-[:MANAGES]-(p3),
+  (opp1)-[:CATEGORY]->(pba1),
+  (opp1)-[:CATEGORY]->(pba2),
+  (opp1)-[:CATEGORY]->(pba3),
+  (opp1)-[:OPERATES_AS]->(lf1),
+  (opp1)-[:REGISTERED_IN]->(cit1),
+  (cit1)-[:LIES_IN]->(county1),
+  (county1)-[:LIES_IN]->(voi1)
+  
+CREATE
+  (opp2)<-[:MANAGES]-(p3),
+  (opp2)<-[:MANAGES]-(p4),
+  (opp2)<-[:MANAGES]-(p5),
+  (opp2)-[:CATEGORY]->(pba4),
+  (opp2)-[:CATEGORY]->(pba5),
+  (opp2)-[:CATEGORY]->(pba6),
+  (opp2)-[:OPERATES_AS]->(lf3),
+  (opp2)-[:REGISTERED_IN]->(cit2),
+  (cit2)-[:LIES_IN]->(county2),
+  (county2)-[:LIES_IN]->(voi2)
+
+CREATE
+  (opp3)<-[:MANAGES]-(p6),
+  (opp3)<-[:MANAGES]-(p7),
+  (opp3)<-[:MANAGES]-(p8),
+  (opp3)-[:CATEGORY]->(pba6),
+  (opp3)-[:CATEGORY]->(pba7),
+  (opp3)-[:CATEGORY]->(pba8),
+  (opp3)-[:OPERATES_AS]->(lf6),
+  (opp3)-[:REGISTERED_IN]->(cit3),
+  (cit3)-[:LIES_IN]->(county3),
+  (county3)-[:LIES_IN]->(voi3)
