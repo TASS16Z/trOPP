@@ -6,7 +6,6 @@
         {% for person in object_list|dictsort:"name" %}
             <a href="{{ person.get_absolute_url }}" class="list-group-item">
                 <h4 class="list-group-item-heading">{{ person }}</h4>
-                <p class="list-group-item-text">More to come</p>
             </a>
         {% empty %}
             <a href="/">

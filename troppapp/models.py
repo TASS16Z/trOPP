@@ -51,6 +51,16 @@ class City(NodeHandle):
         obj_handle = db.get_county(self.handle_id)[0]
         return County.objects.get(handle_id=obj_handle)
     county = property(_county)
+    def _opps(self):
+        opps = []
+        for obj_handle in db.get_city_opps(self.handle_id):
+            opps.append(OPP.objects.get(handle_id=obj_handle[0]))
+        return opps
+    opps = property(_opps)
+    def get_json(self):
+        return { 'name' : self.name,
+                 'id' : self.handle_id,
+                 'class-name' : self.__class__.__name__ }
 
 class Aim(NodeHandle):
     def __unicode__(self):
@@ -69,6 +79,17 @@ class PublicBenefitArea(NodeHandle):
     name = property(_name)
     def get_absolute_url(self):
         return ''#reverse('public_benefit_area-detail', args=[str(self.id)])
+    def _opps(self):
+        opps = []
+        for obj_handle in db.get_pba_opps(self.handle_id):
+            opps.append(OPP.objects.get(handle_id=obj_handle[0]))
+        return opps
+    opps = property(_opps)
+    def get_json(self):
+        return { 'name' : self.name,
+                 'id' : self.handle_id,
+                 'class-name' : self.__class__.__name__ }
+
 
 class TerritorialReach(NodeHandle):
     def __unicode__(self):
@@ -78,6 +99,17 @@ class TerritorialReach(NodeHandle):
     name = property(_name)
     def get_absolute_url(self):
         return ''#reverse('territorial_reach-detail', args=[str(self.id)])
+    def _opps(self):
+        opps = []
+        for obj_handle in db.get_tr_opps(self.handle_id):
+            opps.append(OPP.objects.get(handle_id=obj_handle[0]))
+        return opps
+    opps = property(_opps)
+    def get_json(self):
+        return { 'name' : self.name,
+                 'id' : self.handle_id,
+                 'class-name' : self.__class__.__name__ }
+
 
 class LegalForm(NodeHandle):
     def __unicode__(self):
@@ -87,6 +119,17 @@ class LegalForm(NodeHandle):
     name = property(_name)
     def get_absolute_url(self):
         return ''#reverse('legal_form-detail', args=[str(self.id)])
+    def _opps(self):
+        opps = []
+        for obj_handle in db.get_lf_opps(self.handle_id):
+            opps.append(OPP.objects.get(handle_id=obj_handle[0]))
+        return opps
+    opps = property(_opps)
+    def get_json(self):
+        return { 'name' : self.name,
+                 'id' : self.handle_id,
+                 'class-name' : self.__class__.__name__ }
+
 
 class Person(NodeHandle):
     def __unicode__(self):
@@ -96,6 +139,17 @@ class Person(NodeHandle):
     name = property(_name)
     def get_absolute_url(self):
         return reverse('person-detail', args=[str(self.id)])
+    def _opps(self):
+        opps = []
+        for obj_handle in db.get_person_opps(self.handle_id):
+            opps.append(OPP.objects.get(handle_id=obj_handle[0]))
+        return opps
+    opps = property(_opps)
+    def get_json(self):
+        return { 'name' : self.name,
+                 'id' : self.handle_id,
+                 'class-name' : self.__class__.__name__ }
+
 
 class OPP(NodeHandle):
     def __unicode__(self):
@@ -125,7 +179,7 @@ class OPP(NodeHandle):
     def _aims(self):
         aims = []
         for obj_handle in db.get_aims(self.handle_id):
-            aims.append({'aim': Aim.objects.get(handle_id=obj_handle)})
+            aims.append(Aim.objects.get(handle_id=obj_handle))
         return aims
     aims = property(_aims)
 
@@ -133,7 +187,7 @@ class OPP(NodeHandle):
         public_benefit_areas = []
         for obj_handle in db.get_public_benefit_areas(self.handle_id)[0]:
             public_benefit_areas.append(
-                {'area': PublicBenefitArea.objects.get(handle_id=obj_handle)})
+                PublicBenefitArea.objects.get(handle_id=obj_handle))
         return public_benefit_areas
     public_benefit_areas = property(_public_benefit_areas)
 
@@ -141,7 +195,7 @@ class OPP(NodeHandle):
         territorial_reach = []
         for terr_id in db.get_territorial_reach(self.handle_id):
             territorial_reach.append(
-                {'reach': TerritorialReach.objects.get(handle_id=terr_id)})
+                TerritorialReach.objects.get(handle_id=terr_id))
         return territorial_reach
     territorial_reach = property(_territorial_reach)
 
@@ -149,3 +203,9 @@ class OPP(NodeHandle):
         obj_handle = db.get_legal_form(self.handle_id)[0]
         return LegalForm.objects.get(handle_id=obj_handle)
     legal_form = property(_legal_form)
+
+    def get_json(self):
+        return { 'name' : self.name,
+                 'id' : self.handle_id,
+                 'average_salary' : self.node()['average_salary'],
+                 'class-name' : self.__class__.__name__ }

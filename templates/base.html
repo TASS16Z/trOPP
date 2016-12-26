@@ -12,6 +12,29 @@
     <link href="{% static "css/bootstrap.min.css" %}" rel="stylesheet">
     <link href="{% static "css/jumbotron-narrow.css" %}" rel="stylesheet">
 
+    <style>
+.node {
+  cursor: pointer;
+
+    circle{
+      stroke: #34495e;
+      stroke-width: 2px;
+      box-sizing: border-box;
+      stroke-location: inside;
+    }
+
+    text {
+      font-size: 11px;
+    }
+}
+
+line.link {
+  fill: none;
+  stroke: #bbb;
+  stroke-width: 1.5px;
+}
+    </style>
+
 
     <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
@@ -19,28 +42,21 @@
       <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
       <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
     <![endif]-->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+    <script src="{% static "js/bootstrap/bootstrap.min.js" %}"></script>
+    <script src="https://d3js.org/d3.v3.js"></script>
   </head>
   <body>
     <div class="container">
       <div class="header">
         <ul class="nav nav-pills pull-right">
           <li><a href="/">Home</a></li>
-            <li><a href="/OPP/">OPP</a></li>
-            <li><a href="/persons/">Osoby</a></li>
+          <li><a href="/OPP/">OPP</a></li>
+          <li><a href="/persons/">Osoby</a></li>
         </ul>
         <h3 class="text-muted">{% block heading %}trOPP{% endblock %}</h3>
       </div>
       {% block content %}{% endblock %}
-      <!--
-            <div>
-              <h4>Debug</h4>
-              handle_id: {{ object.handle_id }}
-            </div>
-            -->
     </div>
-    <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
-    <!-- Include all compiled plugins (below), or include individual files as needed -->
-    <script src="{% static "js/bootstrap/bootstrap.min.js" %}"></script>
   </body>
 </html>

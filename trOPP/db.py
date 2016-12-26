@@ -55,6 +55,45 @@ def get_county(handle_id):
     with manager.read as reader:
         return reader.execute(query, handle_id=handle_id).fetchone()
 
+def get_city_opps(handle_id):
+    query = """
+        MATCH (n:City {handle_id: {handle_id}})<-[r:REGISTERED_IN]-(opp)
+        RETURN opp.handle_id
+        """
+    with manager.read as reader:
+        return reader.execute(query, handle_id=handle_id).fetchall()
+
+def get_pba_opps(handle_id):
+    query = """
+        MATCH (n:PublicBenefitArea {handle_id: {handle_id}})<-[r:CATEGORY]-(opp)
+        RETURN opp.handle_id
+        """
+    with manager.read as reader:
+        return reader.execute(query, handle_id=handle_id).fetchall()
+
+def get_tr_opps(handle_id):
+    query = """
+        MATCH (n:TerritorialReach {handle_id: {handle_id}})<-[r:OPERATES_IN]-(opp)
+        RETURN opp.handle_id
+        """
+    with manager.read as reader:
+        return reader.execute(query, handle_id=handle_id).fetchall()
+
+def get_lf_opps(handle_id):
+    query = """
+        MATCH (n:LegalForm {handle_id: {handle_id}})<-[r:OPERATES_AS]-(opp)
+        RETURN opp.handle_id
+        """
+    with manager.read as reader:
+        return reader.execute(query, handle_id=handle_id).fetchall()
+
+def get_person_opps(handle_id):
+    query = """
+        MATCH (n:Person {handle_id: {handle_id}})-[r:MANAGES]->(opp)
+        RETURN opp.handle_id
+        """
+    with manager.read as reader:
+        return reader.execute(query, handle_id=handle_id).fetchall()
 
 def get_board_members(handle_id):
     query = """
