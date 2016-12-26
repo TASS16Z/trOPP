@@ -8,17 +8,28 @@
     <li><a data-toggle="tab" href="#" view="{% url "opp_by_board_members" %}">OPP by board members</a></li>
     <li><a data-toggle="tab" href="#" view="{% url "opp_by_area" %}">OPP by public benefit area</a></li>
   </ul>
+  <div>
+    <label>Omit keys</label>
+    <label id="direct-link-switch" class="checkbox-inline switch">
+      <input id="direct-link" type="checkbox">
+      <div class="slider round"></div>
+    </label>
+  </div>
   <div id="graph"></div>
 </div>
 <script>
 $('ul.nav-pills li a').click(function() {           
-  console.log(this.getAttribute('view'));
-    updateGraph(this.getAttribute('view'));
+  updateGraph($(this).attr('view'), $('input#direct-link')[0].checked);
 });
+
+$('input#direct-link').click(function() {
+  updateGraph($('ul.graph-buttons li.active a').first().attr('view'), this.checked);
+});
+
 var svg = d3.select("#graph").append("svg")
   .attr("width", width)
   .attr("height", height);
 
-updateGraph('{% url "opp_by_city" %}');
+updateGraph('{% url "opp_by_city" %}', false);
 </script>
 {% endblock %}

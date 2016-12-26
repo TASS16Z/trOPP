@@ -9,13 +9,13 @@ var width = 700, height = 700, graph, node, link;
 var force = d3.layout.force()
   .size([width, height])
   .on("tick", tick)
-  .charge(-700)
-  .gravity(0.2)
-  .friction(0.9)
-  .linkDistance(20);
+  .charge(-400)
+  .gravity(0.1)
+  .friction(0.5)
+  .linkDistance(50);
 
-function updateGraph(url) {
-  d3.json(url, function(error, g) {
+function updateGraph(url, isDirect) {
+  d3.json(url + "?isDirect=" + isDirect, function(error, g) {
     var nodeMap = {};
     g.nodes.forEach(function(x) { nodeMap[x.id] = x; });
     g.links = g.links.map(function(x) {
