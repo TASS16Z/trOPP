@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% block title %}{{ block.super }} | Home{% endblock %}
 {% block content %}
-<div class="col-md-12 text-center">
+<div class="col-md-9 text-center">
   <ul class="nav nav-pills graph-buttons center-pills">
     <li class="active"><a data-toggle="tab" href="#" view="{% url "opp_by_city" %}">OPP by city</a></li>
     <li><a data-toggle="tab" href="#" view="{% url "opp_by_legal_form" %}">OPP by legal form</a></li>
@@ -17,6 +17,15 @@
   </div>
   <div id="graph"></div>
 </div>
+<div class="col-md-3">
+  <div class="panel panel-primary">
+    <div class="panel-heading">
+      <h3 class="panel-title">Informacje szczegółowe</h3>
+    </div>
+    <div class="panel-body detail-panel">
+    </div>
+  </div>
+</div>
 <script>
 $('ul.nav-pills li a').click(function() {           
   updateGraph($(this).attr('view'), $('input#direct-link')[0].checked);
@@ -27,9 +36,10 @@ $('input#direct-link').click(function() {
 });
 
 var svg = d3.select("#graph").append("svg")
-  .attr("width", width)
-  .attr("height", height);
+.attr("width", width)
+.attr("height", height);
 
 updateGraph('{% url "opp_by_city" %}', false);
+
 </script>
 {% endblock %}

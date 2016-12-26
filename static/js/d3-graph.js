@@ -62,8 +62,8 @@ function update() {
     .call(force.drag);
 
   nodeG.append("circle")  
-    .attr("r", 10)
-  //    .on("click", click)
+    .attr("r", setNodeSize)
+    .on("click", nodeClick)
     .style("fill", function(d) { return color(d['class-name']);});
 
   nodeG.append("text")
@@ -83,4 +83,23 @@ function tick() {
 
   node.attr("transform", function(d) {
     return "translate(" + d.x + "," + d.y + ")"; });
+};
+
+function nodeClick(d){
+  $.getJSON("api/details?class=" + d['class-name'] + "&handle_id=" + d.id,
+    function(data) {
+      var items = [];
+      $.each(data, function(key, val) {
+        items.push("<dt>" + key + "</dt><dd>" + val + "</dd>");
+      });
+      var details = $("<d1/>", {
+        html: items.join("")
+      });
+      $("div.detail-panel").html(details);
+    });
+};
+
+function setNodeSize(d){
+  if(d['class-name']=='OPP') return d.average_salary/100;
+  return 10;
 };

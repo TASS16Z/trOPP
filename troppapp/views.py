@@ -1,5 +1,6 @@
 import json
 from itertools import combinations
+from django.db import models
 from django.http import HttpResponse
 from django.shortcuts import render
 from django.views.generic.detail import DetailView
@@ -44,7 +45,6 @@ def _get_graph(class_node, class_edge, connection, isDirect):
     return HttpResponse(json.dumps({'nodes' : nodes, 'links' : links }),
                         content_type="application/json")
 
-
 def opp_by_city(request):
     return _get_graph(OPP, City, "opps", request.GET['isDirect'])
 
@@ -56,3 +56,12 @@ def opp_by_board_members(request):
 
 def opp_by_area(request):
     return _get_graph(OPP, PublicBenefitArea, "opps", request.GET['isDirect'])
+
+def _get_class_details(classname, handle_id):
+    for c in models.get_models():
+        if c.__name__ == classname:
+            return c.objects.get(handle_id=handle_id).get_json()
+    return ""
+
+def details(request):
+    return HttpResponse(json.dumps(_get_class_details(request.GET['class'], request.GET['handle_id'])), content_type="application/json")

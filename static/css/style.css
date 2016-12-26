@@ -1,6 +1,7 @@
 body {
   padding-top: 70px;
   padding-bottom: 30px;
+  width: 100%;
 }
 
 .theme-dropdown .dropdown-menu {
@@ -98,4 +99,8 @@ input:checked + .slider:before {
 
 .slider.round:before {
   border-radius: 50%;
+}
+
+.panel-body.detail-panel{
+  height: 500px;
 }
