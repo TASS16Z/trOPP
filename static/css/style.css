@@ -1,0 +1,43 @@
+body {
+  padding-top: 70px;
+  padding-bottom: 30px;
+}
+
+.theme-dropdown .dropdown-menu {
+  position: static;
+  display: block;
+  margin-bottom: 20px;
+}
+
+.theme-showcase > p > .btn {
+  margin: 5px 0;
+}
+
+.theme-showcase .navbar .container {
+  width: auto;
+}
+.node {
+  cursor: pointer;
+
+    circle{
+      stroke: #34495e;
+      stroke-width: 2px;
+      box-sizing: border-box;
+      stroke-location: inside;
+    }
+
+    text {
+      font-size: 11px;
+    }
+}
+
+line.link {
+  fill: none;
+  stroke: #bbb;
+  stroke-width: 1.5px;
+}
+
+.center-pills {
+  display: flex;
+  justify-content: center;
+}
