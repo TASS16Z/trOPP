@@ -35,11 +35,14 @@ $('input#direct-link').click(function() {
   updateGraph($('ul.graph-buttons li.active a').first().attr('view'), this.checked);
 });
 
-var svg = d3.select("#graph").append("svg")
+var canvas = d3.select("#graph").append("canvas")
 .attr("width", width)
 .attr("height", height);
 
-updateGraph('{% url "opp_by_city" %}', false);
+var detachedContainer = document.createElement("custom");
+var dataContainer = d3.select(detachedContainer);
 
+updateGraph('{% url "opp_by_city" %}', false);
+//d3.timer(drawCanvas);
 </script>
 {% endblock %}

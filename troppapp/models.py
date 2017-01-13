@@ -140,5 +140,5 @@ class OPP(NodeHandle):
     def get_json(self):
         return { 'name' : self.name,
                  'id' : self.handle_id,
-                 'average_salary' : self.node()['average_salary'],
+                 'average_salary' : self.node().get('average_salary', 'No salary data'),
                  'class-name' : self.__class__.__name__ }

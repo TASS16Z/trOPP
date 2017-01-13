@@ -4,46 +4,29 @@ String.prototype.trunc = String.prototype.trunc ||
   };
 
 var color = d3.scale.category10();
-var width = 700, height = 700, graph, node, link;
+var width = 700, height = 700, graph, node, link, context;
 
 var force = d3.layout.force()
   .size([width, height])
   .on("tick", tick)
-  .charge(-400)
+  .charge(-4)
   .gravity(0.1)
   .friction(0.5)
-  .linkDistance(50);
+  .linkDistance(5);
 
 function updateGraph(url, isDirect) {
   d3.json(url + "?isDirect=" + isDirect, function(error, g) {
-    var nodeMap = {};
-    g.nodes.forEach(function(x) { nodeMap[x.id] = x; });
-    g.links = g.links.map(function(x) {
-      return {
-        source: g.nodes.indexOf(nodeMap[x.source]),
-        target: g.nodes.indexOf(nodeMap[x.target])
-      };
-    });
     graph = g;
     update();
   });
 }
 
 function update() {
-  link = svg.selectAll("line.link")
-    .remove();
-  node = svg.selectAll(".node")
-    .remove();
-  // Start the force layout.
-  force
-    .nodes(graph.nodes)
-    .links(graph.links)
-    .start();
   // Update the links…
-  link = svg.selectAll("line.link")
+  link = dataContainer.selectAll("line.link")
     .data(graph.links);//, function(d) { return d.target.id; });
   // Enter any new links.
-  link.enter().insert("svg:line", ".node")
+  link.enter().insert("line", ".node")
     .attr("class", "link")
     .attr("x1", function(d) { return d.source.x; })
     .attr("y1", function(d) { return d.source.y; })
@@ -52,12 +35,12 @@ function update() {
   // Exit any old links.
   link.exit().remove();
   // Update the nodes…
-  node = svg.selectAll(".node")
+  node = dataContainer.selectAll(".node")
     .data(graph.nodes);
 
   var nodeE = node.enter();
 
-  var nodeG = nodeE.append("g")
+  var nodeG = nodeE.append("custom")
     .attr("class", "node")
     .call(force.drag);
 
@@ -72,8 +55,15 @@ function update() {
     .text(function(d) { return d.name.trunc(10) });
 
   node.exit().remove();
+  force
+    .nodes(graph.nodes)
+    .links(graph.links);
 
+  force.start();
 };
+
+function drawCanvas() {
+}
 
 function tick() {
   link.attr("x1", function(d) { return d.source.x; })
@@ -83,6 +73,26 @@ function tick() {
 
   node.attr("transform", function(d) {
     return "translate(" + d.x + "," + d.y + ")"; });
+  
+  context = canvas.node().getContext("2d");
+  context.clearRect(0, 0, width, height);
+
+  // draw links
+  context.strokeStyle = "#ccc";
+  context.beginPath();
+  graph.links.forEach(function(d) {
+    context.moveTo(d.source.x, d.source.y);
+    context.lineTo(d.target.x, d.target.y);
+  });
+  context.stroke();
+  // draw nodes
+  context.fillStyle = "steelblue";
+  context.beginPath();
+  graph.nodes.forEach(function(d) {
+    context.moveTo(d.x, d.y);
+    context.arc(d.x, d.y, 4.5, 0, 2 * Math.PI);
+  });
+  context.fill();
 };
 
 function nodeClick(d){
@@ -100,6 +110,6 @@ function nodeClick(d){
 };
 
 function setNodeSize(d){
-  if(d['class-name']=='OPP') return d.average_salary/100;
+//  if(d['class-name']=='OPP') return d.average_salary/100;
   return 10;
 };

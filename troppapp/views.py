@@ -1,3 +1,5 @@
+from neo4j import contextmanager
+from django.conf import settings
 import json
 from itertools import combinations
 from django.db import models
@@ -7,6 +9,12 @@ from django.views.generic.detail import DetailView
 from django.views.generic.list import ListView
 from troppapp.models import OPP, Person, City, LegalForm, PublicBenefitArea
 from trOPP import db
+
+manager = contextmanager.Neo4jDBConnectionManager(
+    settings.NEO4J_RESOURCE_URI,
+    settings.NEO4J_USERNAME,
+    settings.NEO4J_PASSWORD)
+
 
 class OPPDetailView(DetailView):
     model = OPP
@@ -23,39 +31,54 @@ class PersonListView(ListView):
 def index(request):
     return render(request, 'index.html')
 
-def _get_graph(class_node, class_edge, connection, isDirect):
+def _get_graph(class_from, class_to, connection, isDirect):
     nodes = []
     links = []
-    for node in class_node.objects.all():
-        nodes.append(node.get_json())
-
-    for edge in class_edge.objects.all():
-        if isDirect == 'true':
-            temp = []
-            for node in getattr(edge, connection):
-                temp.append(node.handle_id)
-            links.extend([ { 'source' : i, 'target' : j }
-                         for i, j in combinations(temp, 2) ])
-        else:
-            nodes.append(edge.get_json())
-            for node in getattr(edge, connection):
-                links.append({ 'source' : node.handle_id,
-                               'target' : edge.handle_id })
+    query = """
+        MATCH (n:%s)-[r:%s]->(w:%s) RETURN n.handle_id, w.handle_id
+        """ % (class_from.__name__, connection, class_to.__name__) 
+    with manager.read as reader:
+         links_list = reader.execute(query).fetchall()
+         
+    nodes_set = set(val for l in links_list for val in l)
+    nodes_dict = {d:i for i, d in enumerate(nodes_set) }
+    
+    for key in nodes_dict.keys():
+        nodes.append({ 'name': key })
+    
+    for link in links_list:
+        links.append({ 'source' : nodes_dict[link[0]],
+                       'target' : nodes_dict[link[1]] })
+#    for node in class_node.objects.all():
+#        nodes.append(node.get_json())
+#
+#    for edge in class_edge.objects.all():
+#        if isDirect == 'true':
+#            temp = []
+#            for node in getattr(edge, connection):
+#                temp.append(node.handle_id)
+#            links.extend([ { 'source' : i, 'target' : j }
+#                         for i, j in combinations(temp, 2) ])
+#        else:
+#            nodes.append(edge.get_json())
+#            for node in getattr(edge, connection):
+#                links.append({ 'source' : node.handle_id,
+#                               'target' : edge.handle_id })
 
     return HttpResponse(json.dumps({'nodes' : nodes, 'links' : links }),
                         content_type="application/json")
 
 def opp_by_city(request):
-    return _get_graph(OPP, City, "opps", request.GET['isDirect'])
+    return _get_graph(OPP, City, "REGISTERED_IN", request.GET['isDirect'])
 
 def opp_by_legal_form(request):
-    return _get_graph(OPP, LegalForm, "opps", request.GET['isDirect'])
+    return _get_graph(OPP, LegalForm, "OPERATES_AS", request.GET['isDirect'])
 
 def opp_by_board_members(request):
-    return _get_graph(OPP, Person, "opps", request.GET['isDirect'])
+    return _get_graph(Person, OPP, "MANAGES", request.GET['isDirect'])
 
 def opp_by_area(request):
-    return _get_graph(OPP, PublicBenefitArea, "opps", request.GET['isDirect'])
+    return _get_graph(OPP, PublicBenefitArea, "CATEGORY", request.GET['isDirect'])
 
 def _get_class_details(classname, handle_id):
     for c in models.get_models():
