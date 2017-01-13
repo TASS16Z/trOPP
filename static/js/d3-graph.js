@@ -9,7 +9,7 @@ var width = 700, height = 700, graph, node, link, context;
 var force = d3.layout.force()
   .size([width, height])
   .on("tick", tick)
-  .charge(-4)
+  .charge(-2)
   .gravity(0.1)
   .friction(0.5)
   .linkDistance(5);
@@ -63,17 +63,6 @@ function update() {
 };
 
 function drawCanvas() {
-}
-
-function tick() {
-  link.attr("x1", function(d) { return d.source.x; })
-    .attr("y1", function(d) { return d.source.y; })
-    .attr("x2", function(d) { return d.target.x; })
-    .attr("y2", function(d) { return d.target.y; });
-
-  node.attr("transform", function(d) {
-    return "translate(" + d.x + "," + d.y + ")"; });
-  
   context = canvas.node().getContext("2d");
   context.clearRect(0, 0, width, height);
 
@@ -93,6 +82,17 @@ function tick() {
     context.arc(d.x, d.y, 4.5, 0, 2 * Math.PI);
   });
   context.fill();
+}
+
+function tick() {
+  link.attr("x1", function(d) { return d.source.x; })
+    .attr("y1", function(d) { return d.source.y; })
+    .attr("x2", function(d) { return d.target.x; })
+    .attr("y2", function(d) { return d.target.y; });
+
+  node.attr("transform", function(d) {
+    return "translate(" + d.x + "," + d.y + ")"; });
+  drawCanvas();
 };
 
 function nodeClick(d){
@@ -111,5 +111,5 @@ function nodeClick(d){
 
 function setNodeSize(d){
 //  if(d['class-name']=='OPP') return d.average_salary/100;
-  return 10;
+  return 5;
 };

@@ -3,15 +3,18 @@
 
 {% block content %}
     <div class="page-header">
-        <h1>{{ object.name }} <small>{{ object.node.no_of_beneficiaries }}</small></h1>
+        <h1>{{ object.name |default:"Brak danych" }} <small>{{ object.node.no_of_beneficiaries |default:"Brak danych"  }}</small></h1>
     </div>
     <div class="row">
         <div class="col-md-6">
             <dl class="dl-horizontal">
-                <dt>Salaries:</dt><dd>{{ object.node.salaries }}</dd>
-                <dt>Average salary:</dt><dd>{{ object.node.average_salary }}</dd>
-                <dt>Forma prawna:</dt><dd>{{ object.legal_form.name }}</dd>
-                <dt>Miasto:</dt> <dd>{{ object.city.name }},{{ object.city.county.name }}, {{ object.city.county.voivodeship.name }}  </dd>
+                <dt>KRS:</dt><dd>{{ object.node.krs |default:"Brak danych"  }}</dd>
+                <dt>Wynagrodzenia:</dt><dd>{{ object.node.salaries |default:"Brak danych"  }}</dd>
+                <dt>Średnie wynagr.:</dt><dd>{{ object.node.average_salary |default:"Brak danych"  }}</dd>
+                <dt>Forma prawna:</dt><dd>{{ object.legal_form.name |default:"Brak danych"  }}</dd>
+                <dt>Miasto:</dt> <dd>{{ object.city.name |default:"Brak danych"  }}</dd>
+                <dt>Gmina:</dt> <dd>{{ object.city.county.name |default:"Brak danych"  }}</dd>
+                <dt>Województwo:</dt> <dd>{{ object.city.county.voivodeship.name |default:"Brak danych"  }}  </dd>
             </dl>
         </div>
     </div>

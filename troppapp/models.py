@@ -25,25 +25,25 @@ class Voivodeship(NodeHandle):
 
 class County(NodeHandle):
     def _voivodeship(self):
-        obj_handle = db.get_voivodeship(self.handle_id)[0]
+        obj_handle = db.get_one(County, Voivodeship, "LIES_IN", self.handle_id)
         return Voivodeship.objects.get(handle_id=obj_handle)
     voivodeship = property(_voivodeship)
 
 class City(NodeHandle):
     def _county(self):
-        obj_handle = db.get_county(self.handle_id)[0]
+        obj_handle = db.get_one(City, County, "LIES_IN", self.handle_id)
         return County.objects.get(handle_id=obj_handle)
-    county = property(_county)
     def _opps(self):
         opps = []
-        for obj_handle in db.get_city_opps(self.handle_id):
-            opps.append(OPP.objects.get(handle_id=obj_handle[0]))
+        for obj_handle in db.get_all(City, OPP, "REGISTERED_IN", self.handle_id, directed_in = True):
+            opps.append(OPP.objects.get(handle_id=obj_handle))
         return opps
-    opps = property(_opps)
     def get_json(self):
         return { 'name' : self.name,
                  'id' : self.handle_id,
                  'class-name' : self.__class__.__name__ }
+    county = property(_county)
+    opps = property(_opps)
 
 class Aim(NodeHandle):
     pass
@@ -51,94 +51,96 @@ class Aim(NodeHandle):
 class PublicBenefitArea(NodeHandle):
     def _opps(self):
         opps = []
-        for obj_handle in db.get_pba_opps(self.handle_id):
-            opps.append(OPP.objects.get(handle_id=obj_handle[0]))
+        for obj_handle in db.get_all(PublicBenefitArea, OPP, "CATEGORY", self.handle_id, directed_in = True):
+            opps.append(OPP.objects.get(handle_id=obj_handle))
         return opps
-    opps = property(_opps)
     def get_json(self):
         return { 'name' : self.name,
                  'id' : self.handle_id,
                  'class-name' : self.__class__.__name__ }
+    opps = property(_opps)
 
 class TerritorialReach(NodeHandle):
     def _opps(self):
         opps = []
-        for obj_handle in db.get_tr_opps(self.handle_id):
-            opps.append(OPP.objects.get(handle_id=obj_handle[0]))
+        for obj_handle in db.get_all(TerritorialReach, OPP, "OPERATES_IN", self.handle_id, directed_in = True):
+            opps.append(OPP.objects.get(handle_id=obj_handle))
         return opps
-    opps = property(_opps)
     def get_json(self):
         return { 'name' : self.name,
                  'id' : self.handle_id,
                  'class-name' : self.__class__.__name__ }
+    opps = property(_opps)
 
 class LegalForm(NodeHandle):
     def _opps(self):
         opps = []
-        for obj_handle in db.get_lf_opps(self.handle_id):
-            opps.append(OPP.objects.get(handle_id=obj_handle[0]))
+        for obj_handle in db.get_all(LegalForm, OPP, "OPERATES_AS", self.handle_id, directed_in = True):
+            opps.append(OPP.objects.get(handle_id=obj_handle))
         return opps
-    opps = property(_opps)
     def get_json(self):
         return { 'name' : self.name,
                  'id' : self.handle_id,
                  'class-name' : self.__class__.__name__ }
+    opps = property(_opps)
 
 class Person(NodeHandle):
     def get_absolute_url(self):
         return reverse('person-detail', args=[str(self.id)])
     def _opps(self):
         opps = []
-        for obj_handle in db.get_person_opps(self.handle_id):
-            opps.append(OPP.objects.get(handle_id=obj_handle[0]))
+        for obj_handle in db.get_all(Person, OPP, "MANAGES", self.handle_id):
+            opps.append(OPP.objects.get(handle_id=obj_handle))
         return opps
-    opps = property(_opps)
     def get_json(self):
         return { 'name' : self.name,
                  'id' : self.handle_id,
                  'class-name' : self.__class__.__name__ }
+    opps = property(_opps)
 
 class OPP(NodeHandle):
     def get_absolute_url(self):
         return reverse('opp-detail', args=[str(self.id)])
     def _board_members(self):
         board_members = []
-        for obj_handle, role in db.get_board_members(self.handle_id):
-            board_members.append(
-                {'person': Person.objects.get(handle_id=obj_handle),
-                 'role': role})
+        for obj_handle in db.get_all(OPP, Person, "MANAGES", self.handle_id, directed_in = True):
+            board_members.append(Person.objects.get(handle_id=obj_handle))
         return board_members
-    board_members = property(_board_members)
     def _city(self):
-        obj_handle = db.get_city(self.handle_id)[0]
+        obj_handle = db.get_one(OPP, City, "REGISTERED_IN", self.handle_id)
         return City.objects.get(handle_id=obj_handle)
-    city = property(_city)
     def _aims(self):
         aims = []
-        for obj_handle in db.get_aims(self.handle_id):
+        for obj_handle in db.get_all(OPP, Aim, "DOES", self.handle_id):
             aims.append(Aim.objects.get(handle_id=obj_handle))
         return aims
-    aims = property(_aims)
     def _public_benefit_areas(self):
         public_benefit_areas = []
-        for obj_handle in db.get_public_benefit_areas(self.handle_id)[0]:
+        for obj_handle in db.get_all(OPP, PublicBenefitArea, "CATEGORY", self.handle_id):
             public_benefit_areas.append(
                 PublicBenefitArea.objects.get(handle_id=obj_handle))
         return public_benefit_areas
-    public_benefit_areas = property(_public_benefit_areas)
     def _territorial_reach(self):
         territorial_reach = []
-        for terr_id in db.get_territorial_reach(self.handle_id):
+        for terr_id in db.get_all(OPP, TerritorialReach, "OPERATES_IN", self.handle_id):
             territorial_reach.append(
                 TerritorialReach.objects.get(handle_id=terr_id))
         return territorial_reach
-    territorial_reach = property(_territorial_reach)
     def _legal_form(self):
-        obj_handle = db.get_legal_form(self.handle_id)[0]
+        obj_handle = db.get_one(OPP, LegalForm, "OPERATES_AS", self.handle_id)
         return LegalForm.objects.get(handle_id=obj_handle)
-    legal_form = property(_legal_form)
     def get_json(self):
         return { 'name' : self.name,
                  'id' : self.handle_id,
                  'average_salary' : self.node().get('average_salary', 'No salary data'),
                  'class-name' : self.__class__.__name__ }
+    def get_fields_and_properties(self):
+        field_names = [f.name for f in OPP._meta.fields]
+        property_names = [name for name in dir(OPP) if isinstance(getattr(OPP, name), property)]
+        return dict((name, getattr(self, name)) for name in field_names + property_names)
+    city = property(_city)
+    aims = property(_aims)
+    public_benefit_areas = property(_public_benefit_areas)
+    territorial_reach = property(_territorial_reach)
+    legal_form = property(_legal_form)
+    board_members = property(_board_members)

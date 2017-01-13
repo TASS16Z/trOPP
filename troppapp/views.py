@@ -21,12 +21,14 @@ class OPPDetailView(DetailView):
 
 class OPPListView(ListView):
     model = OPP
+    paginate_by = 20
 
 class PersonDetailView(DetailView):
     model = Person
 
 class PersonListView(ListView):
     model = Person
+    paginate_by = 20
 
 def index(request):
     return render(request, 'index.html')
@@ -49,22 +51,6 @@ def _get_graph(class_from, class_to, connection, isDirect):
     for link in links_list:
         links.append({ 'source' : nodes_dict[link[0]],
                        'target' : nodes_dict[link[1]] })
-#    for node in class_node.objects.all():
-#        nodes.append(node.get_json())
-#
-#    for edge in class_edge.objects.all():
-#        if isDirect == 'true':
-#            temp = []
-#            for node in getattr(edge, connection):
-#                temp.append(node.handle_id)
-#            links.extend([ { 'source' : i, 'target' : j }
-#                         for i, j in combinations(temp, 2) ])
-#        else:
-#            nodes.append(edge.get_json())
-#            for node in getattr(edge, connection):
-#                links.append({ 'source' : node.handle_id,
-#                               'target' : edge.handle_id })
-
     return HttpResponse(json.dumps({'nodes' : nodes, 'links' : links }),
                         content_type="application/json")
 

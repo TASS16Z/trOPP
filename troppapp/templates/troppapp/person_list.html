@@ -2,15 +2,31 @@
 {% block title %}{{ block.super }} | Persons{% endblock %}
 
 {% block content %}
-    <div class="list-group">
-        {% for person in object_list|dictsort:"name" %}
-            <a href="{{ person.get_absolute_url }}" class="list-group-item">
-                <h4 class="list-group-item-heading">{{ person }}</h4>
-            </a>
-        {% empty %}
-            <a href="/">
-                <h4 class="list-group-item-heading">No persons yet</h4>
-            </a>
-        {% endfor %}
-    </div>
+<div class="list-group">
+  {% for person in object_list|dictsort:"name" %}
+  <a href="{{ person.get_absolute_url }}" class="list-group-item">
+    <h4 class="list-group-item-heading">{{ person }}</h4>
+  </a>
+  {% empty %}
+  <a href="/">
+    <h4 class="list-group-item-heading">No persons yet</h4>
+  </a>
+  {% endfor %}
+  {% if is_paginated %}
+  <div class="pagination">
+    <span class="page-links">
+      {% if page_obj.has_previous %}
+      <a href="/persons?page={{ page_obj.previous_page_number }}">previous</a>
+      {% endif %}
+      <span class="page-current">
+        Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+      </span>
+      {% if page_obj.has_next %}
+      <a href="/persons?page={{ page_obj.next_page_number }}">next</a>
+      {% endif %}
+    </span>
+  </div>
+  {% endif %}
+</div>
+
 {% endblock %}
