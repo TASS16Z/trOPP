@@ -6,7 +6,7 @@ from troppapp.models import (
     OPP,
     Person,
     Voivodeship,
-    County,
+    District,
     City,
     PublicBenefitArea,
     TerritorialReach,
@@ -23,7 +23,7 @@ class Command(BaseCommand):
         self._add_objects(OPP)
         self._add_objects(Person)
         self._add_objects(Voivodeship)
-        self._add_objects(County)
+        self._add_objects(District)
         self._add_objects(City)
         self._add_objects(PublicBenefitArea)
         self._add_objects(TerritorialReach)

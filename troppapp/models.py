@@ -26,9 +26,9 @@ class Voivodeship(NodeHandle):
                  'id' : self.handle_id,
                  'class-name' : self.__class__.__name__ }
 
-class County(NodeHandle):
+class District(NodeHandle):
     def _voivodeship(self):
-        obj_handle = db.get_one(County, Voivodeship, "LIES_IN", self.handle_id)
+        obj_handle = db.get_one(District, Voivodeship, "LIES_IN", self.handle_id)
         return Voivodeship.objects.get(handle_id=obj_handle)
     def get_json(self):
         return { 'name' : self.name,
@@ -37,9 +37,9 @@ class County(NodeHandle):
     voivodeship = property(_voivodeship)
 
 class City(NodeHandle):
-    def _county(self):
-        obj_handle = db.get_one(City, County, "LIES_IN", self.handle_id)
-        return County.objects.get(handle_id=obj_handle)
+    def _district(self):
+        obj_handle = db.get_one(City, District, "LIES_IN", self.handle_id)
+        return District.objects.get(handle_id=obj_handle)
     def _opps(self):
         opps = []
         for obj_handle in db.get_all(City, OPP, "REGISTERED_IN", self.handle_id, directed_in = True):
@@ -49,7 +49,7 @@ class City(NodeHandle):
         return { 'name' : self.name,
                  'id' : self.handle_id,
                  'class-name' : self.__class__.__name__ }
-    county = property(_county)
+    district = property(_district)
     opps = property(_opps)
 
 class Aim(NodeHandle):

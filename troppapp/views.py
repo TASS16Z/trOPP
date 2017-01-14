@@ -40,7 +40,7 @@ def _get_nodes(class_name):
         MATCH (n:%s) RETURN n.handle_id
         """ % class_name.__name__ 
     with manager.read as reader:
-         nodes_set = reader.execute(query).fetchall()
+        nodes_set = reader.execute(query).fetchall()
     for key in nodes_set:
         nodes.append(class_name.objects.get(handle_id=key[0]).get_json())
     return HttpResponse(json.dumps({'nodes' : nodes, 'links' : links }),
