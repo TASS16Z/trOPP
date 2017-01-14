@@ -7,7 +7,7 @@ from django.http import HttpResponse
 from django.shortcuts import render
 from django.views.generic.detail import DetailView
 from django.views.generic.list import ListView
-from troppapp.models import OPP, Person, City, LegalForm, PublicBenefitArea
+from troppapp.models import * 
 from trOPP import db
 
 manager = contextmanager.Neo4jDBConnectionManager(
@@ -33,38 +33,89 @@ class PersonListView(ListView):
 def index(request):
     return render(request, 'index.html')
 
-def _get_graph(class_from, class_to, connection, isDirect):
+def _get_nodes(class_name):
     nodes = []
     links = []
     query = """
-        MATCH (n:%s)-[r:%s]->(w:%s) RETURN n.handle_id, w.handle_id
-        """ % (class_from.__name__, connection, class_to.__name__) 
+        MATCH (n:%s) RETURN n.handle_id
+        """ % class_name.__name__ 
     with manager.read as reader:
-         links_list = reader.execute(query).fetchall()
-         
-    nodes_set = set(val for l in links_list for val in l)
-    nodes_dict = {d:i for i, d in enumerate(nodes_set) }
-    
-    for key in nodes_dict.keys():
-        nodes.append({ 'name': key })
-    
+         nodes_set = reader.execute(query).fetchall()
+    for key in nodes_set:
+        nodes.append(class_name.objects.get(handle_id=key[0]).get_json())
+    return HttpResponse(json.dumps({'nodes' : nodes, 'links' : links }),
+                        content_type="application/json")
+        
+def _get_children(classname, node_handle):
+    nodes = []
+    links = []
+    for c in models.get_models():
+        if c.__name__ == classname:
+            caller_class = c
+            caller_obj = c.objects.get(handle_id=node_handle)
+            break
+    # get all siblings
+    if caller_class in [Voivodeship, LegalForm, PublicBenefitArea, TerritorialReach]:
+        query = """
+            MATCH (n:%s) RETURN n.handle_id
+            """ % c.__name__ 
+        with manager.read as reader:
+            nodes_set = reader.execute(query).fetchall()
+        for key in nodes_set:
+            nodes.append(caller_class.objects.get(handle_id=key[0]).get_json())
+
+    # get siblings with the same parent, connect parent
+    else:
+        query = """
+            MATCH (c1 {handle_id:{handle_id}})-[]->(parent)
+            OPTIONAL MATCH (c2)-[]->(parent) WHERE c1 <> c2
+            RETURN c1.handle_id, c2.handle_id, labels(parent)[0], parent.handle_id
+            """ 
+        with manager.read as reader:
+            nodes_set = reader.execute(query, handle_id = node_handle).fetchall()
+        # append parent node
+        for c in models.get_models():
+            if c.__name__ == nodes_set[0][2]:
+                nodes.append(c.objects.get(handle_id=nodes_set[0][3]).get_json())
+        # append caller node
+        nodes.append(caller_class.objects.get(handle_id=node_handle).get_json())
+        links.append({ "source" : nodes_set[0][3], "target" : node_handle })
+
+        for key in nodes_set:
+            if key[1] is not None:
+                nodes.append(caller_class.objects.get(handle_id=key[1]).get_json())
+                links.append({ "source" : nodes_set[0][3],
+                           "target" : key[1] })
+
+    # get children
+    query = """
+        MATCH (n)-[]->(w {handle_id: {handle_id}})
+        RETURN labels(n)[0], n.handle_id
+        """ 
+    with manager.read as reader:
+        links_list = reader.execute(query, handle_id = node_handle).fetchall()
+
+    # children with links
     for link in links_list:
-        links.append({ 'source' : nodes_dict[link[0]],
-                       'target' : nodes_dict[link[1]] })
+        for c in models.get_models():
+            if c.__name__ == link[0]:
+                nodes.append(c.objects.get(handle_id=link[1]).get_json())
+                links.append({ "source" : node_handle,
+                               "target" : link[1] })
     return HttpResponse(json.dumps({'nodes' : nodes, 'links' : links }),
                         content_type="application/json")
 
-def opp_by_city(request):
-    return _get_graph(OPP, City, "REGISTERED_IN", request.GET['isDirect'])
+def node_click(request):
+    return _get_children(request.GET['class'], request.GET['handle_id'])
 
-def opp_by_legal_form(request):
-    return _get_graph(OPP, LegalForm, "OPERATES_AS", request.GET['isDirect'])
+def voivodeships(request):
+    return _get_nodes(Voivodeship)
 
-def opp_by_board_members(request):
-    return _get_graph(Person, OPP, "MANAGES", request.GET['isDirect'])
+def legal_forms(request):
+    return _get_nodes(LegalForm)
 
-def opp_by_area(request):
-    return _get_graph(OPP, PublicBenefitArea, "CATEGORY", request.GET['isDirect'])
+def areas(request):
+    return _get_nodes(Areas)
 
 def _get_class_details(classname, handle_id):
     for c in models.get_models():

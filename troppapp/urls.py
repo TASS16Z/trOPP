@@ -1,25 +1,14 @@
 from django.conf.urls import url, patterns
-from troppapp.views import (
-    OPPListView,
-    OPPDetailView,
-    PersonListView,
-    PersonDetailView,
-    opp_by_city,
-    opp_by_legal_form,
-    opp_by_board_members,
-    opp_by_area,
-    details
-)
-
+from troppapp.views import *
 urlpatterns = patterns(
     'troppapp.views',
     # Index view
     url(r'^$', 'index'),
     url(r'^OPP/$', OPPListView.as_view(), name='opp-list'),
-    url(r'^api/opp_by_city', opp_by_city, name='opp_by_city'),
-    url(r'^api/opp_by_legal_form', opp_by_legal_form, name='opp_by_legal_form'),
-    url(r'^api/opp_by_board_members', opp_by_board_members, name='opp_by_board_members'),
-    url(r'^api/opp_by_area', opp_by_area, name='opp_by_area'),
+    url(r'^api/voivodeships', voivodeships, name='voivodeships'),
+    url(r'^api/node_click', node_click, name='node_click'),
+    url(r'^api/legal_forms', legal_forms, name='legal_forms'),
+    url(r'^api/areas', areas, name='areas'),
     url(r'^api/details', details, name='details'),
     url(r'^OPP/(?P<pk>[\d]+)/$', OPPDetailView.as_view(), name='opp-detail'),
     url(r'^persons/$', PersonListView.as_view(), name='person-list'),

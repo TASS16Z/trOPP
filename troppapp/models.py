@@ -21,12 +21,19 @@ class NodeHandle(models.Model):
     name = property(_name)
 
 class Voivodeship(NodeHandle):
-    pass
+    def get_json(self):
+        return { 'name' : self.name,
+                 'id' : self.handle_id,
+                 'class-name' : self.__class__.__name__ }
 
 class County(NodeHandle):
     def _voivodeship(self):
         obj_handle = db.get_one(County, Voivodeship, "LIES_IN", self.handle_id)
         return Voivodeship.objects.get(handle_id=obj_handle)
+    def get_json(self):
+        return { 'name' : self.name,
+                 'id' : self.handle_id,
+                 'class-name' : self.__class__.__name__ }
     voivodeship = property(_voivodeship)
 
 class City(NodeHandle):

@@ -1,20 +1,28 @@
 {% extends 'base.html' %}
 {% block title %}{{ block.super }} | Home{% endblock %}
 {% block content %}
+<script>
+$(document).ready(function(){
+ $('a[rel=tipsy]').tipsy({fade: true, gravity: 'n'});
+svg = d3.select("#graph").append("svg")
+    .attr("width", width)
+    .attr("height", height)
+    .call(d3.behavior.zoom().x(x).y(y).scaleExtent([1, 8]).on("zoom", tick));
+  
+$('ul.nav-pills li a').click(function() {           
+  updateGraph($(this).attr('view'));
+});
+
+updateGraph('{% url "voivodeships" %}');
+});
+</script>
+
 <div class="col-md-9 text-center">
   <ul class="nav nav-pills graph-buttons center-pills">
-    <li class="active"><a data-toggle="tab" href="#" view="{% url "opp_by_city" %}">OPP by city</a></li>
-    <li><a data-toggle="tab" href="#" view="{% url "opp_by_legal_form" %}">OPP by legal form</a></li>
-    <li><a data-toggle="tab" href="#" view="{% url "opp_by_board_members" %}">OPP by board members</a></li>
-    <li><a data-toggle="tab" href="#" view="{% url "opp_by_area" %}">OPP by public benefit area</a></li>
+    <li class="active"><a data-toggle="tab" href="#" view="{% url "voivodeships" %}">OPP by city</a></li>
+    <li><a data-toggle="tab" href="#" view="{% url "legal_forms" %}">OPP by legal form</a></li>
+    <li><a data-toggle="tab" href="#" view="{% url "areas" %}">OPP by public benefit area</a></li>
   </ul>
-  <div>
-    <label>Omit keys</label>
-    <label id="direct-link-switch" class="checkbox-inline switch">
-      <input id="direct-link" type="checkbox">
-      <div class="slider round"></div>
-    </label>
-  </div>
   <div id="graph"></div>
 </div>
 <div class="col-md-3">
@@ -26,23 +34,4 @@
     </div>
   </div>
 </div>
-<script>
-$('ul.nav-pills li a').click(function() {           
-  updateGraph($(this).attr('view'), $('input#direct-link')[0].checked);
-});
-
-$('input#direct-link').click(function() {
-  updateGraph($('ul.graph-buttons li.active a').first().attr('view'), this.checked);
-});
-
-var canvas = d3.select("#graph").append("canvas")
-.attr("width", width)
-.attr("height", height);
-
-var detachedContainer = document.createElement("custom");
-var dataContainer = d3.select(detachedContainer);
-
-updateGraph('{% url "opp_by_city" %}', false);
-//d3.timer(drawCanvas);
-</script>
 {% endblock %}
