@@ -55,7 +55,7 @@ def _get_opp_graph(node_handle):
         WITH n, q, COUNT(*) as cnt
         WHERE cnt > 1
         RETURN q.handle_id, cnt 
-        ORDER BY cnt desc LIMIT 80
+        ORDER BY cnt desc LIMIT 50
         """ 
     with manager.read as reader:
         query_result = reader.execute(query, handle_id = node_handle).fetchall()
@@ -161,7 +161,7 @@ def _get_children(classname, node_handle):
         query = """
             MATCH (n)-[]->(w {handle_id: {handle_id}})
             RETURN labels(n)[0], n.handle_id
-            LIMIT 90
+            LIMIT 50
             """ 
         with manager.read as reader:
             links_list = reader.execute(query, handle_id = node_handle).fetchall()

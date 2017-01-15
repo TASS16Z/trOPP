@@ -24,6 +24,11 @@ var lineScale = d3.scale.pow()
   .domain([3, 10])
   .range([0.5, 8]);
 
+var nodeSizeScale = d3.scale.linear()
+  .domain([0, 100000])
+  .range([5, 50])
+  .clamp(true);
+
 var svg;
 var force = d3.layout.force()
   .gravity(0.5)
@@ -178,7 +183,7 @@ var LOCALE = {
   "NAME": "Nazwa",
   "AVERAGE_SALARY": "Średnie wynagrodzenie",
   "NO_OF_BENEFICIARIES": "Liczba odbiorców działań organizacji",
-  "SALARIES": "Łączna kwota wynagrodzeń",
+  "SALARIES": "Odsetek budżetu przeznaczony na wynagrodzenia",
   "NO_OF_EMPLOYEES": "Liczba pracowników"
 };
 
@@ -201,6 +206,6 @@ function getJSONDetails(json){
 }
 
 function setNodeSize(d){
-  if(d['class-name']=='OPP') return Math.max(10, d.average_salary/100);
+  if(d['class-name']=='OPP') return Math.max(10, nodeSizeScale(d.average_salary));
   return 20;
 };
