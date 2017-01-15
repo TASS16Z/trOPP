@@ -22,13 +22,29 @@
       <div class="col-md-4">
         <div class="panel panel-default">
           <div class="panel-heading">
+            <h3 class="panel-title">Strefy pożytku publicznego</h3>
+          </div>
+          <div class="panel-body">
+            <ul>
+              {% for pba in object.public_benefit_areas %}
+              <li> {{ pba.name }} </li>
+              {% empty %}
+              <li>Brak danych</li>
+              {% endfor %}
+            </ul>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="panel panel-default">
+          <div class="panel-heading">
             <h3 class="panel-title">Osoby</h3>
           </div>
           <div class="panel-body">
-            <ul class="list-unstyled">
-              {% for board_member in object.board_members|dictsort:"person.name" %}
+            <ul>
+              {% for board_member in object.board_members|dictsort:"name" %}
               <li>
-                <a href="{{ board_member.person.get_absolute_url }}">{{ board_member.person.name }}</a> as <ul> <li>{{ board_member.role }}</li> </ul>
+                {{ board_member.name }}
               </li>
               {% empty %}
               <li>Brak danych</li>
@@ -45,27 +61,7 @@
           <div class="panel-body">
             <ul class="list-unstyled">
               {% for aim in object.aims %}
-              <li>
-                <a href="{{ aim.aim.get_absolute_url }}">{{ aim.aim.name }}</a>
-              </li>
-              {% empty %}
-              <li>Brak danych</li>
-              {% endfor %}
-            </ul>
-          </div>
-        </div>
-      </div>
-      <div class="col-md-4">
-        <div class="panel panel-default">
-          <div class="panel-heading">
-            <h3 class="panel-title">Strefy pożytku publicznego</h3>
-          </div>
-          <div class="panel-body">
-            <ul class="list-unstyled">
-              {% for pba in object.public_benefit_areas %}
-              <li>
-                <a href="{{ pba.area.get_absolute_url }}">{{ pba.area.name }}</a>
-              </li>
+              <li> {{ aim.name }} </li>
               {% empty %}
               <li>Brak danych</li>
               {% endfor %}
@@ -81,9 +77,7 @@
           <div class="panel-body">
             <ul class="list-unstyled">
               {% for tr in object.territorial_reach %}
-              <li>
-                <a href="{{ tr.reach.get_absolute_url }}">{{ tr.reach.name }}</a>
-              </li>
+              <li> {{ tr.name }} </li>
               {% empty %}
               <li>Brak danych</li>
               {% endfor %}

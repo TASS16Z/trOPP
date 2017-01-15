@@ -23,13 +23,6 @@ class OPPListView(ListView):
     model = OPP
     paginate_by = 20
 
-class PersonDetailView(DetailView):
-    model = Person
-
-class PersonListView(ListView):
-    model = Person
-    paginate_by = 20
-
 def index(request):
     return render(request, 'index.html')
 

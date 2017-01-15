@@ -11,8 +11,4 @@ urlpatterns = patterns(
     url(r'^api/areas', areas, name='areas'),
     url(r'^api/details', details, name='details'),
     url(r'^OPP/(?P<pk>[\d]+)/$', OPPDetailView.as_view(), name='opp-detail'),
-    url(r'^persons/$', PersonListView.as_view(), name='person-list'),
-    url(r'^persons/(?P<pk>[\d]+)/$',
-        PersonDetailView.as_view(),
-        name='person-detail'),
 )

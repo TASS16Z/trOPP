@@ -196,9 +196,12 @@ function getJSONDetails(json){
   items.push("<dd><h4><strong>" + gettext(json["name"]) + "</strong><h4></dd>");
   items.push("<hr>");
   $.each(json, function(key, val) {
-    if(["class-name", "id", "name"].indexOf(key) < 0)
+    if(["class-name", "model_id", "id", "name"].indexOf(key) < 0)
       items.push("<dt>" + gettext(key) + "</dt><dd>" + val + "</dd>");
   });
+  items.push("<hr>");
+  if(!isNaN(json["model_id"]))
+    items.push("<a href='/OPP/"+json["model_id"]+"'>Więcej szczegółów</a>");
   var details = $("<dl/>", {
     html: items.join("")
   });

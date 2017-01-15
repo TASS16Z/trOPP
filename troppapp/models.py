@@ -113,7 +113,7 @@ class OPP(NodeHandle):
     def _board_members(self):
         board_members = []
         for obj_handle in db.get_all(OPP, Person, "MANAGES", self.handle_id, directed_in = True):
-            board_members.append(Person.objects.get(handle_id=obj_handle))
+            board_members.append(Person.objects.get(handle_id=obj_handle[0]))
         return board_members
     def _city(self):
         obj_handle = db.get_one(OPP, City, "REGISTERED_IN", self.handle_id)
@@ -121,19 +121,19 @@ class OPP(NodeHandle):
     def _aims(self):
         aims = []
         for obj_handle in db.get_all(OPP, Aim, "DOES", self.handle_id):
-            aims.append(Aim.objects.get(handle_id=obj_handle))
+            aims.append(Aim.objects.get(handle_id=obj_handle[0]))
         return aims
     def _public_benefit_areas(self):
         public_benefit_areas = []
         for obj_handle in db.get_all(OPP, PublicBenefitArea, "CATEGORY", self.handle_id):
             public_benefit_areas.append(
-                PublicBenefitArea.objects.get(handle_id=obj_handle))
+                PublicBenefitArea.objects.get(handle_id=obj_handle[0]))
         return public_benefit_areas
     def _territorial_reach(self):
         territorial_reach = []
         for terr_id in db.get_all(OPP, TerritorialReach, "OPERATES_IN", self.handle_id):
             territorial_reach.append(
-                TerritorialReach.objects.get(handle_id=terr_id))
+                TerritorialReach.objects.get(handle_id=terr_id[0]))
         return territorial_reach
     def _legal_form(self):
         obj_handle = db.get_one(OPP, LegalForm, "OPERATES_AS", self.handle_id)
@@ -141,6 +141,7 @@ class OPP(NodeHandle):
     def get_json(self):
         node = self.node()
         return { 'name' : self.name.title(),
+                 'model_id' : self.id,
                  'id' : self.handle_id,
                  'City' : self.city.name.title(),
                  'average_salary' : node.get('average_salary', 'No salary data'),
