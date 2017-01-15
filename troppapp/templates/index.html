@@ -3,7 +3,17 @@
 {% block content %}
 <script>
 $(document).ready(function(){
- $('a[rel=tipsy]').tipsy({fade: true, gravity: 'n'});
+$('a[rel=tipsy]').tipsy({fade: true, gravity: 'n'});
+width = $('#graph').width();
+height = $(document).height() - 200;
+x = d3.scale.linear()
+  .domain([0, width])
+  .range([0, width]);
+
+y = d3.scale.linear()
+  .domain([0, height])
+  .range([height, 0]);
+
 svg = d3.select("#graph").append("svg")
     .attr("width", width)
     .attr("height", height)

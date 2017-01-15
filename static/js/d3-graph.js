@@ -118,7 +118,8 @@ function update() {
 
   nodeEnter.append("svg:text")
     .attr("dy", 10)
-    .attr("text-anchor", "middle")
+    .attr("dx", 20)
+    .attr("text-anchor", "left")
     .text(function(d) { return d.name.trunc(10) });
 
   nodeEnter.append("title").text(function(d) { return d.name;} );

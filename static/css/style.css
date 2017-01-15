@@ -25,23 +25,22 @@ body {
 }
 .node {
   cursor: pointer;
+}
+.node circle {
+  stroke-width: 2px;
+  box-sizing: border-box;
+  stroke-location: inside;
+  stroke: #fff;
+}
 
-    circle{
-      stroke: #34495e;
-      stroke-width: 2px;
-      box-sizing: border-box;
-      stroke-location: inside;
-    }
-
-    text {
-      font-size: 11px;
-    }
+.node text {
+  font-size: 14px;
 }
 
 line.link {
-  fill: none;
-  stroke: #bbb;
-  stroke-width: 1.5px;
+  stroke: #999;
+  stroke-opacity: 0.6;
+  stroke-width: 2px;
 }
 
 .center-pills {
