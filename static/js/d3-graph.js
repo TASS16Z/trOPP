@@ -22,12 +22,12 @@ var y = d3.scale.linear()
 
 var svg;
 var force = d3.layout.force()
-  .gravity(0.1)
-  .linkStrength(0.1)
-  .charge(-30)
+  .gravity(0.5)
+  .linkStrength(0.3)
+  .charge(-1300)
   .size([width, height])
   .friction(0.5)
-  .linkDistance(10)
+  .linkDistance(40)
   .on("tick", tick);
 
 var nodes = force.nodes(),
@@ -117,9 +117,12 @@ function update() {
     .attr("fill", function(d) { return color(d['class-name']); });
 
   nodeEnter.append("svg:text")
-    .attr("dy", 10 + 15)
+    .attr("dy", 10)
     .attr("text-anchor", "middle")
     .text(function(d) { return d.name.trunc(10) });
+
+  nodeEnter.append("title").text(function(d) { return d.name;} );
+
   node.exit().remove();
   force.start();
 };
@@ -130,7 +133,7 @@ function tick() {
     .attr("x2", function(d) { return x(d.target.x); })
     .attr("y2", function(d) { return y(d.target.y); });
   node.attr("transform", function(d) {
-    return "translate(" + x(Math.max(radius, Math.min(width - radius, d.x))) + "," + y(Math.max(radius, Math.min(height - radius, d.y))) + ")"; });
+    return "translate(" + x(d.x) + "," + y(d.y) + ")"; });
   update();
 };
 
@@ -151,7 +154,7 @@ function nodeClick(d){
           templinks = []
           json.links.forEach(function(e) { 
             templinks.push({source: findNode(e.source), target: findNode(e.target),
-                            weight: parseInt(e.weight)});
+              weight: parseInt(e.weight)});
           });
           links.replaceContents(templinks);
           update();
@@ -161,6 +164,6 @@ function nodeClick(d){
 };
 
 function setNodeSize(d){
-  if(d['class-name']=='OPP') return d.average_salary/20;
-  return 7;
+  if(d['class-name']=='OPP') return Math.max(10, d.average_salary/100);
+  return 20;
 };
