@@ -22,7 +22,7 @@ class NodeHandle(models.Model):
 
 class Voivodeship(NodeHandle):
     def get_json(self):
-        return { 'name' : self.name,
+        return { 'name' : self.name.title(),
                  'id' : self.handle_id,
                  'class-name' : self.__class__.__name__ }
 
@@ -31,7 +31,8 @@ class District(NodeHandle):
         obj_handle = db.get_one(District, Voivodeship, "LIES_IN", self.handle_id)
         return Voivodeship.objects.get(handle_id=obj_handle)
     def get_json(self):
-        return { 'name' : self.name,
+        return { 'name' : self.name.title(),
+                 'voivodeship' : self.voivodeship.name.title(),
                  'id' : self.handle_id,
                  'class-name' : self.__class__.__name__ }
     voivodeship = property(_voivodeship)
@@ -46,7 +47,8 @@ class City(NodeHandle):
             opps.append(OPP.objects.get(handle_id=obj_handle))
         return opps
     def get_json(self):
-        return { 'name' : self.name,
+        return { 'name' : self.name.title(),
+                 'district' : self.district.name.title(),
                  'id' : self.handle_id,
                  'class-name' : self.__class__.__name__ }
     district = property(_district)
@@ -62,7 +64,7 @@ class PublicBenefitArea(NodeHandle):
             opps.append(OPP.objects.get(handle_id=obj_handle))
         return opps
     def get_json(self):
-        return { 'name' : self.name,
+        return { 'name' : self.name.title(),
                  'id' : self.handle_id,
                  'class-name' : self.__class__.__name__ }
     opps = property(_opps)
@@ -74,7 +76,7 @@ class TerritorialReach(NodeHandle):
             opps.append(OPP.objects.get(handle_id=obj_handle))
         return opps
     def get_json(self):
-        return { 'name' : self.name,
+        return { 'name' : self.name.title(),
                  'id' : self.handle_id,
                  'class-name' : self.__class__.__name__ }
     opps = property(_opps)
@@ -86,7 +88,7 @@ class LegalForm(NodeHandle):
             opps.append(OPP.objects.get(handle_id=obj_handle))
         return opps
     def get_json(self):
-        return { 'name' : self.name,
+        return { 'name' : self.name.title(),
                  'id' : self.handle_id,
                  'class-name' : self.__class__.__name__ }
     opps = property(_opps)
@@ -100,7 +102,7 @@ class Person(NodeHandle):
             opps.append(OPP.objects.get(handle_id=obj_handle))
         return opps
     def get_json(self):
-        return { 'name' : self.name,
+        return { 'name' : self.name.title(),
                  'id' : self.handle_id,
                  'class-name' : self.__class__.__name__ }
     opps = property(_opps)
@@ -138,12 +140,13 @@ class OPP(NodeHandle):
         return LegalForm.objects.get(handle_id=obj_handle)
     def get_json(self):
         node = self.node()
-        return { 'name' : self.name,
+        return { 'name' : self.name.title(),
                  'id' : self.handle_id,
+                 'City' : self.city.name.title(),
                  'average_salary' : node.get('average_salary', 'No salary data'),
-                 'no_of_beneficiaries' : node.get('no_of_beneficiaries', 'No data'),
                  'salaries' : node.get('salaries', 'No data'),
                  'no_of_employees' : node.get('no_of_employees', 'No data'),
+                 'no_of_beneficiaries' : node.get('no_of_beneficiaries', 'No data'),
                  'class-name' : self.__class__.__name__ }
     city = property(_city)
     aims = property(_aims)

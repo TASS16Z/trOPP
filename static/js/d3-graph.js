@@ -141,14 +141,9 @@ function tick() {
 function nodeClick(d){
   $.getJSON("api/details?class=" + d['class-name'] + "&handle_id=" + d.id,
     function(json) {
-      var items = [];
-      $.each(json, function(key, val) {
-        items.push("<dt>" + key + "</dt><dd>" + val + "</dd>");
-      });
-      var details = $("<d1/>", {
-        html: items.join("")
-      });
+      var details = getJSONDetails(json);
       $("div.detail-panel").html(details);
+
       $.getJSON("api/node_click?class=" + d['class-name'] + "&handle_id=" + d.id,
         function(json) {
           nodes.replaceContents(json.nodes);
@@ -163,6 +158,40 @@ function nodeClick(d){
     });
 
 };
+
+var LOCALE = {
+  "OPP" : "Organizacja Pożytku Publicznego",
+  "CITY" : "Miasto",
+  "DISTRICT" : "Powiat",
+  "VOIVODESHIP" : "Województwo",
+  "LEGALFORM" : "Forma prawna",
+  "PUBLICBENEFITAREA" : "Strefa pożytku publicznego",
+  "AIM" : "Cel statutowy",
+  "NAME": "Nazwa",
+  "AVERAGE_SALARY": "Średnie wynagrodzenie",
+  "NO_OF_BENEFICIARIES": "Liczba odbiorców działań organizacji",
+  "SALARIES": "Łączna kwota wynagrodzeń",
+  "NO_OF_EMPLOYEES": "Liczba pracowników"
+};
+
+function gettext(string) {
+  console.log(string.toUpperCase());
+  return LOCALE[string.toUpperCase()] ? LOCALE[string.toUpperCase()] : string;
+}
+function getJSONDetails(json){
+  var items = [];
+  items.push("<dt><h5>" + gettext(json["class-name"]) + "<h5></dt>");
+  items.push("<dd><h4><strong>" + gettext(json["name"]) + "</strong><h4></dd>");
+  items.push("<hr>");
+  $.each(json, function(key, val) {
+    if(["class-name", "id", "name"].indexOf(key) < 0)
+    items.push("<dt>" + gettext(key) + "</dt><dd>" + val + "</dd>");
+  });
+  var details = $("<dl/>", {
+    html: items.join("")
+  });
+  return details;
+}
 
 function setNodeSize(d){
   if(d['class-name']=='OPP') return Math.max(10, d.average_salary/100);
