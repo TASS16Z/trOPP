@@ -185,7 +185,7 @@ def legal_forms(request):
     return _get_nodes(LegalForm)
 
 def areas(request):
-    return _get_nodes(Areas)
+    return _get_nodes(PublicBenefitArea)
 
 def _get_class_details(classname, handle_id):
     for c in models.get_models():
