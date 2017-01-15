@@ -45,6 +45,28 @@ def _get_nodes(class_name):
         nodes.append(class_name.objects.get(handle_id=key[0]).get_json())
     return HttpResponse(json.dumps({'nodes' : nodes, 'links' : links }),
                         content_type="application/json")
+
+def _get_opp_graph(node_handle):
+    nodes = []
+    links = []
+    query = """
+        MATCH path=(n:OPP {handle_id:{handle_id}})-[*1..3]-(e)-[*1..3]-(q:OPP)
+        RETURN n.handle_id, q.handle_id
+        """ 
+    with manager.read as reader:
+        query_result = reader.execute(query, handle_id = node_handle).fetchall()
+    nodes_dict = dict()
+    for x in query_result:
+        nodes_dict[x[0]] = True
+        nodes_dict[x[1]] = True
+    for key in nodes_dict:
+        nodes.append(OPP.objects.get(handle_id=key).get_json())
+    links_dict = {x:query_result.count(x) for x in query_result}
+    for key in links_dict.keys():
+        links.append({ "source" : key[0], "target" : key[1],
+                        "weight": links_dict[key] })
+    return HttpResponse(json.dumps({'nodes' : nodes, 'links' : links }),
+                        content_type="application/json")
         
 def _get_children(classname, node_handle):
     nodes = []
@@ -54,8 +76,11 @@ def _get_children(classname, node_handle):
             caller_class = c
             caller_obj = c.objects.get(handle_id=node_handle)
             break
+    if caller_class == OPP:
+        return _get_opp_graph(node_handle)
     # get all siblings
-    if caller_class in [Voivodeship, LegalForm, PublicBenefitArea, TerritorialReach]:
+    if caller_class in [Voivodeship, LegalForm, 
+                                PublicBenefitArea, TerritorialReach]:
         query = """
             MATCH (n:%s) RETURN n.handle_id
             """ % c.__name__ 

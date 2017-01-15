@@ -137,14 +137,14 @@ class OPP(NodeHandle):
         obj_handle = db.get_one(OPP, LegalForm, "OPERATES_AS", self.handle_id)
         return LegalForm.objects.get(handle_id=obj_handle)
     def get_json(self):
+        node = self.node()
         return { 'name' : self.name,
                  'id' : self.handle_id,
-                 'average_salary' : self.node().get('average_salary', 'No salary data'),
+                 'average_salary' : node.get('average_salary', 'No salary data'),
+                 'no_of_beneficiaries' : node.get('no_of_beneficiaries', 'No data'),
+                 'salaries' : node.get('salaries', 'No data'),
+                 'no_of_employees' : node.get('no_of_employees', 'No data'),
                  'class-name' : self.__class__.__name__ }
-    def get_fields_and_properties(self):
-        field_names = [f.name for f in OPP._meta.fields]
-        property_names = [name for name in dir(OPP) if isinstance(getattr(OPP, name), property)]
-        return dict((name, getattr(self, name)) for name in field_names + property_names)
     city = property(_city)
     aims = property(_aims)
     public_benefit_areas = property(_public_benefit_areas)

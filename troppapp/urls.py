@@ -5,8 +5,8 @@ urlpatterns = patterns(
     # Index view
     url(r'^$', 'index'),
     url(r'^OPP/$', OPPListView.as_view(), name='opp-list'),
-    url(r'^api/voivodeships', voivodeships, name='voivodeships'),
     url(r'^api/node_click', node_click, name='node_click'),
+    url(r'^api/voivodeships', voivodeships, name='voivodeships'),
     url(r'^api/legal_forms', legal_forms, name='legal_forms'),
     url(r'^api/areas', areas, name='areas'),
     url(r'^api/details', details, name='details'),

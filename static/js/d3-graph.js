@@ -68,7 +68,8 @@ function updateGraph(url) {
     nodes.replaceContents(json.nodes);
     templinks = []
     json.links.forEach(function(e) { 
-      templinks.push({source: findNode(e.source), target: findNode(e.target)});
+      templinks.push({source: findNode(e.source), target: findNode(e.target),
+                      weight: parseInt(e.weight)});
     });
     links.replaceContents(templinks);
     update();
@@ -87,6 +88,9 @@ function update() {
       return d.source.id + "-" + d.target.id;
     })
     .attr("class", "link")
+    .style("stroke-width", function (d) {
+      return d.weight*5;
+    })
     .attr("x1", function(d) { return d.source.x; })
     .attr("y1", function(d) { return d.source.y; })
     .attr("x2", function(d) { return d.target.x; })
@@ -146,7 +150,8 @@ function nodeClick(d){
           nodes.replaceContents(json.nodes);
           templinks = []
           json.links.forEach(function(e) { 
-            templinks.push({source: findNode(e.source), target: findNode(e.target)});
+            templinks.push({source: findNode(e.source), target: findNode(e.target),
+                            weight: parseInt(e.weight)});
           });
           links.replaceContents(templinks);
           update();
@@ -156,6 +161,6 @@ function nodeClick(d){
 };
 
 function setNodeSize(d){
-  if(d['class-name']=='OPP') return d.average_salary/2;
+  if(d['class-name']=='OPP') return d.average_salary/20;
   return 7;
 };
