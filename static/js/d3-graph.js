@@ -121,7 +121,6 @@ function update() {
 };
 
 function tick() {
-
   link.attr("x1", function(d) { return x(d.source.x); })
     .attr("y1", function(d) { return y(d.source.y); })
     .attr("x2", function(d) { return x(d.target.x); })
@@ -142,21 +141,21 @@ function nodeClick(d){
         html: items.join("")
       });
       $("div.detail-panel").html(details);
+      $.getJSON("api/node_click?class=" + d['class-name'] + "&handle_id=" + d.id,
+        function(json) {
+          nodes.replaceContents(json.nodes);
+          templinks = []
+          json.links.forEach(function(e) { 
+            templinks.push({source: findNode(e.source), target: findNode(e.target)});
+          });
+          links.replaceContents(templinks);
+          update();
+        });
     });
 
-  $.getJSON("api/node_click?class=" + d['class-name'] + "&handle_id=" + d.id,
-    function(json) {
-      nodes.replaceContents(json.nodes);
-      templinks = []
-      json.links.forEach(function(e) { 
-        templinks.push({source: findNode(e.source), target: findNode(e.target)});
-      });
-      links.replaceContents(templinks);
-      update();
-    });
 };
 
 function setNodeSize(d){
-  //  if(d['class-name']=='OPP') return d.average_salary/100;
-  return 10;
+  if(d['class-name']=='OPP') return d.average_salary/2;
+  return 7;
 };

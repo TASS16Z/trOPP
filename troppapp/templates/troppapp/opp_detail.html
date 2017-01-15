@@ -13,8 +13,8 @@
                 <dt>Średnie wynagr.:</dt><dd>{{ object.node.average_salary |default:"Brak danych"  }}</dd>
                 <dt>Forma prawna:</dt><dd>{{ object.legal_form.name |default:"Brak danych"  }}</dd>
                 <dt>Miasto:</dt> <dd>{{ object.city.name |default:"Brak danych"  }}</dd>
-                <dt>Gmina:</dt> <dd>{{ object.city.county.name |default:"Brak danych"  }}</dd>
-                <dt>Województwo:</dt> <dd>{{ object.city.county.voivodeship.name |default:"Brak danych"  }}  </dd>
+                <dt>Gmina:</dt> <dd>{{ object.city.district.name |default:"Brak danych"  }}</dd>
+                <dt>Województwo:</dt> <dd>{{ object.city.district.voivodeship.name |default:"Brak danych"  }}  </dd>
             </dl>
         </div>
     </div>
