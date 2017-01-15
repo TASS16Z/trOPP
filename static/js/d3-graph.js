@@ -89,7 +89,7 @@ function update() {
     })
     .attr("class", "link")
     .style("stroke-width", function (d) {
-      return d.weight*5;
+      return d.weight;
     })
     .attr("x1", function(d) { return d.source.x; })
     .attr("y1", function(d) { return d.source.y; })

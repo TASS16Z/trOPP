@@ -50,21 +50,40 @@ def _get_opp_graph(node_handle):
     nodes = []
     links = []
     query = """
-        MATCH path=(n:OPP {handle_id:{handle_id}})-[*1..3]-(e)-[*1..3]-(q:OPP)
-        RETURN n.handle_id, q.handle_id
+        MATCH path=(n:OPP {handle_id:{handle_id}})-[*1..2]-(e)-[*1..2]-(q:OPP)
+        RETURN labels(n)[0], n.handle_id, labels(q)[0], q.handle_id
         """ 
     with manager.read as reader:
         query_result = reader.execute(query, handle_id = node_handle).fetchall()
     nodes_dict = dict()
     for x in query_result:
-        nodes_dict[x[0]] = True
-        nodes_dict[x[1]] = True
-    for key in nodes_dict:
-        nodes.append(OPP.objects.get(handle_id=key).get_json())
+        nodes_dict[x[1]] = x[0]
+        nodes_dict[x[3]] = x[2]
     links_dict = {x:query_result.count(x) for x in query_result}
     for key in links_dict.keys():
-        links.append({ "source" : key[0], "target" : key[1],
+        links.append({ "source" : key[1], "target" : key[3],
                         "weight": links_dict[key] })
+    query = """
+        MATCH (n:OPP {handle_id:{handle_id}})-[]->(r)
+        OPTIONAL MATCH (r)-[]->(w)
+        OPTIONAL MATCH (w)-[]->(z)
+        RETURN labels(r)[0], r.handle_id, labels(w)[0], w.handle_id, labels(z)[0], z.handle_id
+        """ 
+    with manager.read as reader:
+        query_result = reader.execute(query, handle_id = node_handle).fetchone()
+    for i in range(0,5,2):
+        if query_result[i] is not None:
+            nodes_dict[query_result[i+1]] = query_result[i]
+            if i == 0:
+                links.append({ "source" : node_handle,
+                    "target" : query_result[i+1] })
+            else:
+                links.append({ "source" : query_result[i-1],
+                    "target" : query_result[i+1] })
+    for key in nodes_dict:
+        for c in models.get_models():
+            if c.__name__ == nodes_dict[key]:
+                nodes.append(c.objects.get(handle_id=key).get_json())
     return HttpResponse(json.dumps({'nodes' : nodes, 'links' : links }),
                         content_type="application/json")
         
@@ -78,9 +97,9 @@ def _get_children(classname, node_handle):
             break
     if caller_class == OPP:
         return _get_opp_graph(node_handle)
-    # get all siblings
     if caller_class in [Voivodeship, LegalForm, 
                                 PublicBenefitArea, TerritorialReach]:
+        # get all siblings
         query = """
             MATCH (n:%s) RETURN n.handle_id
             """ % c.__name__ 
@@ -89,8 +108,8 @@ def _get_children(classname, node_handle):
         for key in nodes_set:
             nodes.append(caller_class.objects.get(handle_id=key[0]).get_json())
 
-    # get siblings with the same parent, connect parent
     else:
+        # get siblings with the same parent, connect parent
         query = """
             MATCH (c1 {handle_id:{handle_id}})-[]->(parent)
             OPTIONAL MATCH (c2)-[]->(parent) WHERE c1 <> c2
@@ -112,21 +131,47 @@ def _get_children(classname, node_handle):
                 links.append({ "source" : nodes_set[0][3],
                            "target" : key[1] })
 
-    # get children
-    query = """
-        MATCH (n)-[]->(w {handle_id: {handle_id}})
-        RETURN labels(n)[0], n.handle_id
-        """ 
-    with manager.read as reader:
-        links_list = reader.execute(query, handle_id = node_handle).fetchall()
+    if caller_class == District: 
+        # get children and children of children
+        query = """
+            MATCH (n)-[]->(w {handle_id: {handle_id}})
+            OPTIONAL MATCH (q)-[]->(n)
+            RETURN labels(n)[0], n.handle_id, labels(q)[0], q.handle_id
+            """ 
+        with manager.read as reader:
+            query_result = reader.execute(query, handle_id = node_handle).fetchall()
+        nodes_dict = dict()
+        for x in query_result:
+            nodes_dict[x[1]] = (x[0], 1)
+            if x[3] is not None: 
+                nodes_dict[x[3]] = (x[2], 2)
+        for key in nodes_dict:
+            for c in models.get_models():
+                if c.__name__ == nodes_dict[key][0]:
+                    nodes.append(c.objects.get(handle_id=key).get_json())
+                    if nodes_dict[key][1] == 1:
+                        links.append({ "source" : node_handle,
+                                   "target" : key })
+                    break
+        # children with links
+        for link in query_result:
+            links.append({ "source" : link[1], "target" : link[3] })
+    else:
+        # get children
+        query = """
+            MATCH (n)-[]->(w {handle_id: {handle_id}})
+            RETURN labels(n)[0], n.handle_id
+            """ 
+        with manager.read as reader:
+            links_list = reader.execute(query, handle_id = node_handle).fetchall()
 
-    # children with links
-    for link in links_list:
-        for c in models.get_models():
-            if c.__name__ == link[0]:
-                nodes.append(c.objects.get(handle_id=link[1]).get_json())
-                links.append({ "source" : node_handle,
-                               "target" : link[1] })
+        # children with links
+        for link in links_list:
+            for c in models.get_models():
+                if c.__name__ == link[0]:
+                    nodes.append(c.objects.get(handle_id=link[1]).get_json())
+                    links.append({ "source" : node_handle,
+                                   "target" : link[1] })
     return HttpResponse(json.dumps({'nodes' : nodes, 'links' : links }),
                         content_type="application/json")
 
