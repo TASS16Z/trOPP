@@ -105,6 +105,7 @@ function update() {
 
   var nodeEnter = node.enter().append("g")
     .attr("class", "node")
+    .on("click", nodeClick)
     .call(force.drag);
 
   nodeEnter.append("svg:circle")
@@ -113,7 +114,6 @@ function update() {
       return "Node;" + d.id;
     })
     .attr("class", "nodeStrokeClass")
-    .on("click", nodeClick)
     .attr("fill", function(d) { return color(d['class-name']); });
 
   nodeEnter.append("svg:text")
