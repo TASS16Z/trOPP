@@ -49,20 +49,20 @@ def _get_nodes(class_name):
 def _get_opp_graph(node_handle):
     nodes = []
     links = []
+    nodes.append(OPP.objects.get(handle_id=node_handle).get_json())
     query = """
-        MATCH path=(n:OPP {handle_id:{handle_id}})-[*1..2]-(e)-[*1..2]-(q:OPP)
-        RETURN labels(n)[0], n.handle_id, labels(q)[0], q.handle_id
+        MATCH path=(n:OPP {handle_id:{handle_id}})-[*1..3]-(q:OPP)
+        WITH n, q, COUNT(*) as cnt
+        WHERE cnt > 1
+        RETURN q.handle_id, cnt 
+        ORDER BY cnt desc LIMIT 80
         """ 
     with manager.read as reader:
         query_result = reader.execute(query, handle_id = node_handle).fetchall()
-    nodes_dict = dict()
-    for x in query_result:
-        nodes_dict[x[1]] = x[0]
-        nodes_dict[x[3]] = x[2]
-    links_dict = {x:query_result.count(x) for x in query_result}
-    for key in links_dict.keys():
-        links.append({ "source" : key[1], "target" : key[3],
-                        "weight": links_dict[key] })
+    for key in query_result:
+        nodes.append(OPP.objects.get(handle_id=key[0]).get_json())
+        links.append({ "source" : node_handle, "target" : key[0],
+                        "weight": key[1] })
     query = """
         MATCH (n:OPP {handle_id:{handle_id}})-[]->(r)
         OPTIONAL MATCH (r)-[]->(w)
@@ -70,16 +70,16 @@ def _get_opp_graph(node_handle):
         RETURN labels(r)[0], r.handle_id, labels(w)[0], w.handle_id, labels(z)[0], z.handle_id
         """ 
     with manager.read as reader:
-        query_result = reader.execute(query, handle_id = node_handle).fetchone()
-    for i in range(0,5,2):
-        if query_result[i] is not None:
-            nodes_dict[query_result[i+1]] = query_result[i]
-            if i == 0:
-                links.append({ "source" : node_handle,
-                    "target" : query_result[i+1] })
-            else:
-                links.append({ "source" : query_result[i-1],
-                    "target" : query_result[i+1] })
+        query_result = reader.execute(query, handle_id = node_handle).fetchall()
+    nodes_dict = dict()
+    for result in query_result:
+        for i in range(0,6,2):
+            if result[i] is not None:
+                nodes_dict[result[i+1]] = result[i]
+                if i == 0:
+                    links.append({ "source" : node_handle, "target" : result[i+1] })
+                else:
+                    links.append({ "source" : result[i-1], "target" : result[i+1] })
     for key in nodes_dict:
         for c in models.get_models():
             if c.__name__ == nodes_dict[key]:
@@ -153,7 +153,7 @@ def _get_children(classname, node_handle):
                         links.append({ "source" : node_handle,
                                    "target" : key })
                     break
-        # children with links
+        # link children
         for link in query_result:
             links.append({ "source" : link[1], "target" : link[3] })
     else:
@@ -161,11 +161,12 @@ def _get_children(classname, node_handle):
         query = """
             MATCH (n)-[]->(w {handle_id: {handle_id}})
             RETURN labels(n)[0], n.handle_id
+            LIMIT 90
             """ 
         with manager.read as reader:
             links_list = reader.execute(query, handle_id = node_handle).fetchall()
 
-        # children with links
+        # link children
         for link in links_list:
             for c in models.get_models():
                 if c.__name__ == link[0]:

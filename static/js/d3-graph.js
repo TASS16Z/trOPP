@@ -10,7 +10,7 @@ Array.prototype.replaceContents = function (array2) {
 };
 
 var color = d3.scale.category10();
-var width = 900, height = 700, radius = 6, node, link;
+var width = 900, height = 700, radius = 6, node, min, max, link;
 
 var x = d3.scale.linear()
   .domain([0, width])
@@ -19,6 +19,10 @@ var x = d3.scale.linear()
 var y = d3.scale.linear()
   .domain([0, height])
   .range([height, 0]);
+
+var lineScale = d3.scale.pow()
+  .domain([3, 10])
+  .range([0.5, 8]);
 
 var svg;
 var force = d3.layout.force()
@@ -89,7 +93,7 @@ function update() {
     })
     .attr("class", "link")
     .style("stroke-width", function (d) {
-      return d.weight;
+      return lineScale(d.weight);
     })
     .attr("x1", function(d) { return d.source.x; })
     .attr("y1", function(d) { return d.source.y; })
@@ -148,10 +152,14 @@ function nodeClick(d){
         function(json) {
           nodes.replaceContents(json.nodes);
           templinks = []
+          min = 100, max = 0;
           json.links.forEach(function(e) { 
+            max = e.weight > max ? e.weight : max;
+            min = e.weight < max ? e.weight : min;
             templinks.push({source: findNode(e.source), target: findNode(e.target),
               weight: parseInt(e.weight)});
           });
+          lineScale.domain([min, max]);
           links.replaceContents(templinks);
           update();
         });
@@ -175,7 +183,6 @@ var LOCALE = {
 };
 
 function gettext(string) {
-  console.log(string.toUpperCase());
   return LOCALE[string.toUpperCase()] ? LOCALE[string.toUpperCase()] : string;
 }
 function getJSONDetails(json){
@@ -185,7 +192,7 @@ function getJSONDetails(json){
   items.push("<hr>");
   $.each(json, function(key, val) {
     if(["class-name", "id", "name"].indexOf(key) < 0)
-    items.push("<dt>" + gettext(key) + "</dt><dd>" + val + "</dd>");
+      items.push("<dt>" + gettext(key) + "</dt><dd>" + val + "</dd>");
   });
   var details = $("<dl/>", {
     html: items.join("")

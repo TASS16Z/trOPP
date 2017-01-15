@@ -14,7 +14,7 @@ $(document).ready(function(){
     .domain([0, height])
     .range([height, 0]);
 
-  force.size([width, height])
+  force.size([width, height]);
 
   svg = d3.select("#graph").append("svg")
     .attr("width", width)
@@ -28,7 +28,6 @@ $(document).ready(function(){
   updateGraph('{% url "voivodeships" %}');
 });
 </script>
-
 <div class="col-md-9 text-center">
   <ul class="nav nav-pills graph-buttons center-pills">
     <li class="active"><a data-toggle="tab" href="#" view="{% url "voivodeships" %}">
@@ -38,7 +37,7 @@ $(document).ready(function(){
     <li><a data-toggle="tab" href="#" view="{% url "areas" %}">
         Według strefy pożytku publicznego</a></li>
   </ul>
-  <div id="graph"></div>
+<div id="graph"></div>
 </div>
 <div class="col-md-3">
   <div class="panel panel-primary">
