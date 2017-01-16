@@ -21,10 +21,12 @@ $(document).ready(function(){
     .attr("height", height)
     .call(d3.behavior.zoom().x(x).y(y).scaleExtent([1, 8]).on("zoom", tick));
 
-  $('ul.nav-pills li a').click(function() {           
+  $('ul.graph-buttons li a').click(function() {           
     updateGraph($(this).attr('view'));
   });
-
+  $('div.detail-panel').on('click', 'ul.opp-toggle li a', function() {           
+    toggleOPP($(this));
+  });
   updateGraph('{% url "voivodeships" %}');
 });
 </script>
@@ -37,7 +39,7 @@ $(document).ready(function(){
     <li><a data-toggle="tab" href="#" view="{% url "areas" %}">
         Według strefy pożytku publicznego</a></li>
   </ul>
-<div id="graph"></div>
+  <div id="graph"></div>
 </div>
 <div class="col-md-3">
   <div class="panel panel-primary">

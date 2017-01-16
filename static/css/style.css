@@ -107,5 +107,5 @@ input:checked + .slider:before {
 }
 
 .panel-body.detail-panel{
-  height: 500px;
+  min-height: 500px;
 }

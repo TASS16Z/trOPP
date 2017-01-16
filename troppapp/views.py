@@ -39,48 +39,69 @@ def _get_nodes(class_name):
     return HttpResponse(json.dumps({'nodes' : nodes, 'links' : links }),
                         content_type="application/json")
 
-def _get_opp_graph(node_handle):
+def _get_opp_graph(node_handle, rel_type):
     nodes = []
     links = []
     nodes.append(OPP.objects.get(handle_id=node_handle).get_json())
-    query = """
-        MATCH path=(n:OPP {handle_id:{handle_id}})-[*1..3]-(q:OPP)
-        WITH n, q, COUNT(*) as cnt
-        WHERE cnt > 1
-        RETURN q.handle_id, cnt 
-        ORDER BY cnt desc LIMIT 50
-        """ 
-    with manager.read as reader:
-        query_result = reader.execute(query, handle_id = node_handle).fetchall()
-    for key in query_result:
-        nodes.append(OPP.objects.get(handle_id=key[0]).get_json())
-        links.append({ "source" : node_handle, "target" : key[0],
-                        "weight": key[1] })
-    query = """
-        MATCH (n:OPP {handle_id:{handle_id}})-[]->(r)
-        OPTIONAL MATCH (r)-[]->(w)
-        OPTIONAL MATCH (w)-[]->(z)
-        RETURN labels(r)[0], r.handle_id, labels(w)[0], w.handle_id, labels(z)[0], z.handle_id
-        """ 
-    with manager.read as reader:
-        query_result = reader.execute(query, handle_id = node_handle).fetchall()
-    nodes_dict = dict()
-    for result in query_result:
-        for i in range(0,6,2):
-            if result[i] is not None:
-                nodes_dict[result[i+1]] = result[i]
-                if i == 0:
-                    links.append({ "source" : node_handle, "target" : result[i+1] })
-                else:
-                    links.append({ "source" : result[i-1], "target" : result[i+1] })
-    for key in nodes_dict:
-        for c in models.get_models():
-            if c.__name__ == nodes_dict[key]:
-                nodes.append(c.objects.get(handle_id=key).get_json())
+    if rel_type == "people":
+        query = """
+            MATCH (n:OPP {handle_id:{handle_id}})-[]-(p:Person)
+            OPTIONAL MATCH (p)-[]-(q:OPP)
+            RETURN p.handle_id, q.handle_id
+            """ 
+        with manager.read as reader:
+            query_result = reader.execute(query, handle_id = node_handle).fetchall()
+        people_dict = dict()
+        opp_dict = dict()
+        for key in query_result:
+            people_dict[key[0]] = Person
+            opp_dict[key[1]] = OPP
+            links.append({ "source" : key[0], "target" : key[1] })
+        for key in people_dict:
+            nodes.append(Person.objects.get(handle_id=key).get_json())
+            links.append({ "source" : node_handle, "target" : key })
+        for key in opp_dict:
+            nodes.append(OPP.objects.get(handle_id=key).get_json())
+
+    else:
+        query = """
+            MATCH path=(n:OPP {handle_id:{handle_id}})-[*1..3]-(q:OPP)
+            WITH n, q, COUNT(*) as cnt
+            WHERE cnt > 1
+            RETURN q.handle_id, cnt 
+            ORDER BY cnt desc LIMIT 50
+            """ 
+        with manager.read as reader:
+            query_result = reader.execute(query, handle_id = node_handle).fetchall()
+        for key in query_result:
+            nodes.append(OPP.objects.get(handle_id=key[0]).get_json())
+            links.append({ "source" : node_handle, "target" : key[0],
+                            "weight": key[1] })
+        query = """
+            MATCH (n:OPP {handle_id:{handle_id}})-[]->(r)
+            OPTIONAL MATCH (r)-[]->(w)
+            OPTIONAL MATCH (w)-[]->(z)
+            RETURN labels(r)[0], r.handle_id, labels(w)[0], w.handle_id, labels(z)[0], z.handle_id
+            """ 
+        with manager.read as reader:
+            query_result = reader.execute(query, handle_id = node_handle).fetchall()
+        nodes_dict = dict()
+        for result in query_result:
+            for i in range(0,6,2):
+                if result[i] is not None:
+                    nodes_dict[result[i+1]] = result[i]
+                    if i == 0:
+                        links.append({ "source" : node_handle, "target" : result[i+1] })
+                    else:
+                        links.append({ "source" : result[i-1], "target" : result[i+1] })
+        for key in nodes_dict:
+            for c in models.get_models():
+                if c.__name__ == nodes_dict[key]:
+                    nodes.append(c.objects.get(handle_id=key).get_json())
     return HttpResponse(json.dumps({'nodes' : nodes, 'links' : links }),
                         content_type="application/json")
         
-def _get_children(classname, node_handle):
+def _get_children(classname, node_handle, rel_type):
     nodes = []
     links = []
     for c in models.get_models():
@@ -89,7 +110,7 @@ def _get_children(classname, node_handle):
             caller_obj = c.objects.get(handle_id=node_handle)
             break
     if caller_class == OPP:
-        return _get_opp_graph(node_handle)
+        return _get_opp_graph(node_handle, rel_type)
     if caller_class in [Voivodeship, LegalForm, 
                                 PublicBenefitArea, TerritorialReach]:
         # get all siblings
@@ -170,7 +191,7 @@ def _get_children(classname, node_handle):
                         content_type="application/json")
 
 def node_click(request):
-    return _get_children(request.GET['class'], request.GET['handle_id'])
+    return _get_children(request.GET['class'], request.GET['handle_id'], request.GET.get('rel_type', 'similar'))
 
 def voivodeships(request):
     return _get_nodes(Voivodeship)

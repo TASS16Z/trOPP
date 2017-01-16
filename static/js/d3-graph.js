@@ -33,10 +33,10 @@ var svg;
 var force = d3.layout.force()
   .gravity(0.5)
   .linkStrength(0.3)
-  .charge(-1300)
+  .charge(-1500)
   .size([width, height])
   .friction(0.5)
-  .linkDistance(40)
+  .linkDistance(50)
   .on("tick", tick);
 
 var nodes = force.nodes(),
@@ -169,7 +169,24 @@ function nodeClick(d){
           update();
         });
     });
+};
 
+function toggleOPP(d){
+  $.getJSON("api/node_click?class=OPP&handle_id=" + d.prop('id') +"&rel_type=" + d.attr('view'),
+    function(json) {
+      nodes.replaceContents(json.nodes);
+      templinks = []
+      min = 100, max = 0;
+      json.links.forEach(function(e) { 
+        max = e.weight > max ? e.weight : max;
+        min = e.weight < max ? e.weight : min;
+        templinks.push({source: findNode(e.source), target: findNode(e.target),
+          weight: parseInt(e.weight)});
+      });
+      lineScale.domain([min, max]);
+      links.replaceContents(templinks);
+      update();
+    });
 };
 
 var LOCALE = {
@@ -200,8 +217,10 @@ function getJSONDetails(json){
       items.push("<dt>" + gettext(key) + "</dt><dd>" + val + "</dd>");
   });
   items.push("<hr>");
-  if(!isNaN(json["model_id"]))
-    items.push("<a href='/OPP/"+json["model_id"]+"'>Więcej szczegółów</a>");
+  if(json["class-name"]=="OPP"){
+    items.push("<a href='/OPP/"+json["model_id"]+"'>Więcej szczegółów</a><hr>");
+    items.push("<ul class='nav nav-pills opp-toggle center-pills'> <li class='active'><a data-toggle='tab' href='#' id='"+json["id"]+"' view='similar'> Pokaż podobne</a></li> <li><a data-toggle='tab' href='#' id='"+json["id"]+"' view='people'> Pokaż powiązania między zarządem</a></li> </ul>");
+  }
   var details = $("<dl/>", {
     html: items.join("")
   });
